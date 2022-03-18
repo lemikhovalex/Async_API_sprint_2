@@ -1,5 +1,6 @@
 from http import HTTPStatus
 
+from api.v1.outer_models import FilmFullInfo, Genre, Person
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from services.films import FilmService, get_film_service
@@ -15,9 +16,7 @@ router = APIRouter()
 # Модель ответа API
 
 
-class Film(BaseModel):
-    id: str
-    title: str
+# todo import from module with shared info
 
 
 # С помощью декоратора регистрируем обработчик film_details
@@ -30,10 +29,20 @@ class Film(BaseModel):
 
 
 # Внедряем FilmService с помощью Depends(get_film_service)
-@router.get("/{film_id}", response_model=Film)
+@router.get("/{film_id}", response_model=FilmFullInfo)
 async def film_details(
     film_id: str, film_service: FilmService = Depends(get_film_service)
-) -> Film:
+) -> FilmFullInfo:
+    return FilmFullInfo(
+        uuid="123",
+        title="the very best movie",
+        imdb_rating=-1.0,
+        description="the best one",
+        genre=[Genre(uuid="17", name="comedy")],
+        actors=[Person(uuid="17", full_name="comediant")],
+        writers=[],
+        directors=[],
+    )
     film = await film_service.get_by_id(film_id)
     if not film:
         # Если фильм не найден, отдаём 404 статус
@@ -51,4 +60,3 @@ async def film_details(
     # ответов API
     # вы бы предоставляли клиентам данные, которые им не нужны
     # и, возможно, данные, которые опасно возвращать
-    return Film(id=film.id, title=film.title)
