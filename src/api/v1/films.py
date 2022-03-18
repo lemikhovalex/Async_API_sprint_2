@@ -1,6 +1,8 @@
 from http import HTTPStatus
+from typing import List
 
-from api.v1.outer_models import FilmFullInfo, Genre, Person
+from api.v1.genres import GenrePartial
+from api.v1.persons import PersonPartial
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from services.films import FilmService, get_film_service
@@ -28,6 +30,17 @@ router = APIRouter()
 # И указываем тип возвращаемого объекта — Film
 
 
+class FilmFullInfo(BaseModel):
+    uuid: str
+    title: str
+    imdb_rating: float
+    description: str
+    genre: List[GenrePartial]
+    actors: List[PersonPartial]
+    writers: List[PersonPartial]
+    directors: List[PersonPartial]
+
+
 # Внедряем FilmService с помощью Depends(get_film_service)
 @router.get("/{film_id}", response_model=FilmFullInfo)
 async def film_details(
@@ -38,8 +51,8 @@ async def film_details(
         title="the very best movie",
         imdb_rating=-1.0,
         description="the best one",
-        genre=[Genre(uuid="17", name="comedy")],
-        actors=[Person(uuid="17", full_name="comediant")],
+        genre=[GenrePartial(uuid="17", name="comedy")],
+        actors=[PersonPartial(uuid="17", full_name="comediant")],
         writers=[],
         directors=[],
     )
