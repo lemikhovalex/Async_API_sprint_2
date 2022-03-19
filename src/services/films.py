@@ -5,6 +5,7 @@ from aioredis import Redis
 from db.elastic import get_elastic
 from db.redis import get_redis
 from elasticsearch import AsyncElasticsearch
+from elasticsearch.exceptions import NotFoundError
 from fastapi import Depends
 from models.film import ESFilm
 
@@ -34,10 +35,11 @@ class FilmService:
         return film
 
     async def _get_film_from_elastic(self, film_id: str) -> Optional[ESFilm]:
+        out = None
         try:
             doc = await self.elastic.get("movies", film_id)
             src = doc["_source"]
-            return ESFilm(
+            out = ESFilm(
                 uuid=src["id"],
                 imdb_rating=src["imdb_rating"],
                 title=src["title"],
@@ -48,7 +50,8 @@ class FilmService:
                 directors=[],
             )
         except NotFoundError:
-            return None
+            pass
+        return out
 
     async def _film_from_cache(self, film_id: str) -> Optional[ESFilm]:
         # Пытаемся получить данные о фильме из кеша, используя команду get
