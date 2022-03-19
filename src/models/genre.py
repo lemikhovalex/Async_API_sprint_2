@@ -8,11 +8,15 @@ from pydantic import BaseModel
 from .utils import orjson_dumps, orjson_loads
 
 
-class ESGenre(BaseModel):
-    id: Str
-    full_name: str
+class IDNameGenre:
+    uuid: str
+    name: str
 
     class Config:
         # Заменяем стандартную работу с json на более быструю
         json_loads = orjson_loads
         json_dumps = orjson_dumps
+
+
+class ESGenre(IDNameGenre):
+    description: str
