@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import List
+from typing import List, Optional
 
 from api.v1.genres import GenrePartial
 from api.v1.persons import PersonPartial
@@ -33,8 +33,8 @@ router = APIRouter()
 class FilmFullInfo(BaseModel):
     uuid: str
     title: str
-    imdb_rating: float
-    description: str
+    imdb_rating: Optional[float]
+    description: Optional[str]
     genre: List[GenrePartial]
     actors: List[PersonPartial]
     writers: List[PersonPartial]
@@ -46,16 +46,16 @@ class FilmFullInfo(BaseModel):
 async def film_details(
     film_id: str, film_service: FilmService = Depends(get_film_service)
 ) -> FilmFullInfo:
-    return FilmFullInfo(
-        uuid="123",
-        title="the very best movie",
-        imdb_rating=-1.0,
-        description="the best one",
-        genre=[GenrePartial(uuid="17", name="comedy")],
-        actors=[PersonPartial(uuid="17", full_name="comediant")],
-        writers=[],
-        directors=[],
-    )
+    # return FilmFullInfo(
+    #     uuid="123",
+    #     title="the very best movie",
+    #     imdb_rating=-1.0,
+    #     description="the best one",
+    #     genre=[GenrePartial(uuid="17", name="comedy")],
+    #     actors=[PersonPartial(uuid="17", full_name="comediant")],
+    #     writers=[],
+    #     directors=[],
+    # )
     film = await film_service.get_by_id(film_id)
     if not film:
         # Если фильм не найден, отдаём 404 статус
@@ -73,3 +73,22 @@ async def film_details(
     # ответов API
     # вы бы предоставляли клиентам данные, которые им не нужны
     # и, возможно, данные, которые опасно возвращать
+    return FilmFullInfo(
+        uuid=film.uuid,
+        imdb_rating=film.imdb_rating,
+        title=film.title,
+        description=film.description,
+        genre=[GenrePartial(uuid=g.uuid, name=g.name) for g in film.genre],
+        actors=[
+            PersonPartial(uuid=p.uuid, full_name=p.full_name)
+            for p in film.actors
+        ],
+        writers=[
+            PersonPartial(uuid=p.uuid, full_name=p.full_name)
+            for p in film.writers
+        ],
+        directors=[
+            PersonPartial(uuid=p.uuid, full_name=p.full_name)
+            for p in film.directors
+        ],
+    )
