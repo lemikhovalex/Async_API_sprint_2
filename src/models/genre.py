@@ -1,14 +1,12 @@
 # Используем pydantic для упрощения работы при перегонке данных из
 # json в объекты
 
-from ast import Str
-
 from pydantic import BaseModel
 
 from .utils import orjson_dumps, orjson_loads
 
 
-class IDNameGenre:
+class IDNameGenre(BaseModel):
     uuid: str
     name: str
 

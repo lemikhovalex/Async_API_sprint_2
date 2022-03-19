@@ -12,9 +12,9 @@ from .utils import orjson_dumps
 
 
 class ESFilm(BaseModel):
-    id: str = Field(alias="film_work_id")
+    uuid: str
     imdb_rating: Optional[float]
-    genre: List[IDNameGenre] = Field(alias="genre_name")
+    genre: List[IDNameGenre]
     title: str
     description: Optional[str]
     # TODO confirm ES index change
