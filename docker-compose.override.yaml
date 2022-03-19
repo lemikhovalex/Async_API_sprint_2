@@ -1,0 +1,8 @@
+version: '3.9'
+services:
+  api:
+    command: sleep infinite
+    volumes:
+      - ./src:/app
+    ports:
+      - '8000:8000'
