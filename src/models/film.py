@@ -13,15 +13,11 @@ from .utils import orjson_dumps
 
 
 class ESFilm(BaseModel):
-    uuid: str
+    uuid: UUID
     imdb_rating: Optional[float]
     genre: List[IDNameGenre]
     title: str
     description: Optional[str]
-    # TODO confirm ES index change
-    # director: List[str] = Field(alias="directors")
-    # actors_names: List[str]
-    # writers_names: List[str]
     actors: List[IDNamePerson]
     writers: List[IDNamePerson]
     directors: List[IDNamePerson]
