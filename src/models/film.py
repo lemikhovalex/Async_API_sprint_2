@@ -5,6 +5,7 @@ import orjson
 # Используем pydantic для упрощения работы при перегонке данных из
 # json в объекты
 from pydantic import BaseModel, Field
+from uuid import UUID
 
 from .genre import IDNameGenre
 from .person import IDNamePerson
