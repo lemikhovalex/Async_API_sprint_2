@@ -28,11 +28,11 @@ async def startup():
     """
     # todo real db must be added so no try
     try:
-        redis.redis = await aioredis.create_redis_pool(
-            (config.REDIS_HOST, config.REDIS_PORT), minsize=10, maxsize=20
+        redis.redis = await aioredis.from_url(
+            f'redis://{config.REDIS_HOST}:{config.REDIS_PORT}'
         )
         elastic.es = AsyncElasticsearch(
-            hosts=[f"{config.ELASTIC_HOST}:{config.ELASTIC_PORT}"]
+            hosts=[f'http://{config.ELASTIC_HOST}:{config.ELASTIC_PORT}']
         )
     except ConnectionRefusedError:
         pass
@@ -51,11 +51,17 @@ async def shutdown():
 
 
 app.include_router(films.router, prefix="/api/v1/films", tags=["film"])
+
 if __name__ == "__main__":
+    uvicorn_kwargs = {
+        'host': '0.0.0.0',
+        'port': 8000,
+        'log_config': LOGGING,
+        'log_level': logging.DEBUG,
+    }
+    if config.UVICORN_RELOAD:
+        uvicorn_kwargs['reload'] = True
     uvicorn.run(
         "main:app",
-        host="0.0.0.0",
-        port=8000,
-        log_config=LOGGING,
-        log_level=logging.DEBUG,
+        **uvicorn_kwargs,
     )
