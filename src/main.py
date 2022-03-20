@@ -51,11 +51,17 @@ async def shutdown():
 
 
 app.include_router(films.router, prefix="/api/v1/films", tags=["film"])
+
 if __name__ == "__main__":
+    uvicorn_kwargs = {
+        'host': '0.0.0.0',
+        'port': 8000,
+        'log_config': LOGGING,
+        'log_level': logging.DEBUG,
+    }
+    if config.UVICORN_RELOAD:
+        uvicorn_kwargs['reload'] = True
     uvicorn.run(
         "main:app",
-        host="0.0.0.0",
-        port=8000,
-        log_config=LOGGING,
-        log_level=logging.DEBUG,
+        **uvicorn_kwargs,
     )
