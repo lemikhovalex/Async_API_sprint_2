@@ -4,12 +4,13 @@
 from typing import List
 
 from pydantic import BaseModel
+from uuid import UUID
 
 from .utils import orjson_dumps, orjson_loads
 
 
 class IDNamePerson(BaseModel):
-    uuid: str
+    uuid: UUID
     full_name: str
 
     class Config:
