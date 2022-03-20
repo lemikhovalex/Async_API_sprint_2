@@ -1,5 +1,6 @@
-rom functools import lru_cache
+from functools import lru_cache
 from typing import Optional
+
 from aioredis import Redis
 from db.elastic import get_elastic
 from db.redis import get_redis
@@ -8,6 +9,7 @@ from fastapi import Depends
 from models.film import Film
 
 FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
+
 
 class FilmService:
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
@@ -58,6 +60,8 @@ class FilmService:
         await self.redis.set(
             film.id, film.json(), expire=FILM_CACHE_EXPIRE_IN_SECONDS
         )
+
+
 @lru_cache()
 def get_film_service(
     redis: Redis = Depends(get_redis),

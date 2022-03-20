@@ -6,14 +6,21 @@ from api.v1.persons import PersonPartial
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from services.films import FilmService, get_film_service
+
 # Объект router, в котором регистрируем обработчики
 router = APIRouter()
+
 # FastAPI в качестве моделей использует библиотеку pydantic
 # https://pydantic-docs.helpmanual.io
 # У неё есть встроенные механизмы валидации, сериализации и десериализации
 # Также она основана на дата-классах
+
 # Модель ответа API
+
+
 # todo import from module with shared info
+
+
 # С помощью декоратора регистрируем обработчик film_details
 # На обработку запросов по адресу <some_prefix>/some_id
 # Позже подключим роутер к корневому роутеру
@@ -21,6 +28,8 @@ router = APIRouter()
 # В сигнатуре функции указываем тип данных, получаемый из адреса запроса
 # (film_id: str)
 # И указываем тип возвращаемого объекта — Film
+
+
 class FilmFullInfo(BaseModel):
     uuid: str
     title: str
@@ -30,6 +39,8 @@ class FilmFullInfo(BaseModel):
     actors: List[PersonPartial]
     writers: List[PersonPartial]
     directors: List[PersonPartial]
+
+
 # Внедряем FilmService с помощью Depends(get_film_service)
 @router.get("/{film_id}", response_model=FilmFullInfo)
 async def film_details(
@@ -54,6 +65,7 @@ async def film_details(
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail="film not found"
         )
+
     # Перекладываем данные из models.Film в Film
     # Обратите внимание, что у модели бизнес-логики есть поле description
     # Которое отсутствует в модели ответа API.
