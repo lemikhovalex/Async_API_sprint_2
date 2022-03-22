@@ -8,6 +8,8 @@ from pydantic import BaseModel
 from services.films import FilmService, get_film_service
 # Объект router, в котором регистрируем обработчики
 router = APIRouter()
+
+
 # FastAPI в качестве моделей использует библиотеку pydantic
 # https://pydantic-docs.helpmanual.io
 # У неё есть встроенные механизмы валидации, сериализации и десериализации
@@ -30,6 +32,8 @@ class FilmFullInfo(BaseModel):
     actors: List[PersonPartial]
     writers: List[PersonPartial]
     directors: List[PersonPartial]
+
+
 # Внедряем FilmService с помощью Depends(get_film_service)
 @router.get("/{film_id}", response_model=FilmFullInfo)
 async def film_details(

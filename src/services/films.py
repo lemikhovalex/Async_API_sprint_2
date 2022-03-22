@@ -3,11 +3,12 @@ from typing import Optional
 from aioredis import Redis
 from db.elastic import get_elastic
 from db.redis import get_redis
-from elasticsearch import AsyncElasticsearch
+from elasticsearch import AsyncElasticsearch, exceptions
 from fastapi import Depends
 from models.film import Film
 
 FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
+
 
 class FilmService:
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
@@ -34,7 +35,7 @@ class FilmService:
     async def _get_film_from_elastic(self, film_id: str) -> Optional[Film]:
         try:
             doc = await self.elastic.get("movies", film_id)
-        except NotFoundError:
+        except exceptions.NotFoundError:
             return None
         return Film(**doc["_source"])
 
@@ -58,6 +59,8 @@ class FilmService:
         await self.redis.set(
             film.id, film.json(), expire=FILM_CACHE_EXPIRE_IN_SECONDS
         )
+
+
 @lru_cache()
 def get_film_service(
     redis: Redis = Depends(get_redis),
