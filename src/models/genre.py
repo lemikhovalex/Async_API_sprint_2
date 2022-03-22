@@ -6,4 +6,4 @@ class IDNameGenre(BaseModel):
 
 
 class Genre(IDNameGenre):
-    description: str
+    pass

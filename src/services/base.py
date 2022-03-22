@@ -5,7 +5,7 @@ from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, exceptions
 from models.base import BaseModel
 
-CACHE_EXPIRE_IN_SECONDS = 1 #60 * 5
+CACHE_EXPIRE_IN_SECONDS = 1
 
 
 class BaseService(ABC):
@@ -28,7 +28,10 @@ class BaseService(ABC):
 
     async def _get_from_elastic(self, entity_id: str) -> Optional[BaseModel]:
         try:
-            doc = await self.elastic.get(index=self._index_name(), id=entity_id)
+            doc = await self.elastic.get(
+                index=self._index_name(),
+                id=entity_id,
+            )
         except exceptions.NotFoundError:
             return None
         return self._result_class().parse_obj(doc["_source"])
