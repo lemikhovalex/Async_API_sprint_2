@@ -12,7 +12,7 @@ from .person import IDNamePerson
 from .utils import orjson_dumps
 
 
-class ESFilm(BaseModel):
+class Film(BaseModel):
     uuid: UUID
     imdb_rating: Optional[float]
     genre: List[IDNameGenre]

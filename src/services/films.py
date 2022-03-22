@@ -1,4 +1,4 @@
-rom functools import lru_cache
+from functools import lru_cache
 from typing import Optional
 from aioredis import Redis
 from db.elastic import get_elastic
