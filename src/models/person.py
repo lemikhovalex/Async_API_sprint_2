@@ -1,25 +1,15 @@
-# Используем pydantic для упрощения работы при перегонке данных из
-# json в объекты
-
 from typing import List
 
-from pydantic import BaseModel
-from uuid import UUID
-
-from .utils import orjson_dumps
-from orjson import loads as orjson_loads
+from .base import BaseModel
 
 
 class IDNamePerson(BaseModel):
-    uuid: UUID
     full_name: str
 
     class Config:
-        # Заменяем стандартную работу с json на более быструю
-        json_loads = orjson_loads
-        json_dumps = orjson_dumps
+        fields = {'uuid': 'id', 'full_name': 'name'}
 
 
-class ESPerson(IDNamePerson):
+class Person(IDNamePerson):
     role: str
     film_ids: List[str]
