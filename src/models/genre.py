@@ -4,7 +4,8 @@
 from pydantic import BaseModel
 from uuid import UUID
 
-from .utils import orjson_dumps, orjson_loads
+from .utils import orjson_dumps
+from orjson import loads as orjson_loads
 
 
 class IDNameGenre(BaseModel):
