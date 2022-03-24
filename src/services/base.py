@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from abc import ABC, abstractmethod
 from aioredis import Redis
@@ -12,6 +12,16 @@ class BaseService(ABC):
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
         self.redis = redis
         self.elastic = elastic
+
+    async def get_by(self, page_number: int, page_size: int, **kwargs) -> List[BaseModel]:
+        result = await self.elastic.search(
+            index=self._index_name(),
+            query={"match_all":{}},
+            from_=page_size*(page_number-1),
+            size=page_size,
+        )
+        return [ self._result_class().parse_obj(doc["_source"])
+            for doc in result['hits']['hits'] ]
 
     async def get_by_id(self, entity_id: str) -> Optional[BaseModel]:
         entity = await self._get_from_cache(entity_id)
