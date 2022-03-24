@@ -90,7 +90,7 @@ async def film_search_general(
     page_size: int = Query(50, alias="page[size]"),
     page_number: int = Query(1, alias="page[number]"),
     film_service: FilmService = Depends(get_film_service),
-    filter_genre: Optional[str] = Query(None, alias="filter[genre]"),
+    filter_genre: Optional[UUID] = Query(None, alias="filter[genre]"),
 ) -> List[PartialFilmInfo]:
     return await get_all_search(
         film_service=film_service,
@@ -108,7 +108,7 @@ async def film_search(
     page_size: int = Query(50, alias="page[size]"),
     page_number: int = Query(1, alias="page[number]"),
     film_service: FilmService = Depends(get_film_service),
-    filter_genre: Optional[str] = Query(None, alias="filter[genre]"),
+    filter_genre: Optional[UUID] = Query(None, alias="filter[genre]"),
 ) -> List[PartialFilmInfo]:
 
     return await get_all_search(
@@ -127,7 +127,7 @@ async def get_all_search(
     query: Optional[str] = None,
     page_size: int = Query(50, alias="page[size]"),
     page_number: int = Query(1, alias="page[number]"),
-    filter_genre: Optional[str] = Query(None, alias="filter[genre]"),
+    filter_genre: Optional[UUID] = Query(None, alias="filter[genre]"),
 ) -> List[PartialFilmInfo]:
     out = await film_service.get_by_query(
         query=query,

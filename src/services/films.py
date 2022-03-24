@@ -76,7 +76,7 @@ class FilmService(BaseService):
         page_size: int = 50,
         page_number: int = 1,
         sort_by: Optional[str] = "imdb_rating",
-        genre_filter: Optional[str] = "comedy",
+        genre_filter: Optional[UUID] = "comedy",
     ) -> List[Film]:
         # TODO try get from redis
         # TODO what is key and val for redis? query params or query body
@@ -105,9 +105,16 @@ class FilmService(BaseService):
         if genre_filter is not None:
             body["query"]["bool"]["must"].append(
                 {
-                    "match": {
-                        "genre": genre_filter,
-                    },
+                    "nested": {
+                        "path": "genres",
+                        "query": {
+                            "term": {
+                                "genres.id": {
+                                    "value": genre_filter
+                                }
+                            }
+                        }
+                    }
                 }
             )
 
