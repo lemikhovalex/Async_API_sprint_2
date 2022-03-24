@@ -7,9 +7,10 @@ class IDNamePerson(BaseModel):
     full_name: str
 
     class Config:
-        fields = {'uuid': 'id', 'full_name': 'name'}
+        fields = {'uuid': 'id'}
 
 
 class Person(IDNamePerson):
-    role: str
-    film_ids: List[str]
+    pass
+    # role: str
+    # film_ids: List[str]
