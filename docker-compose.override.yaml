@@ -3,6 +3,7 @@ services:
   api:
     environment:
       UVICORN_RELOAD: 1
+      DEBUG: 1
     volumes:
       - ./src:/app
     ports:
