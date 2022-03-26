@@ -3,8 +3,9 @@ from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from services.films import FilmService, get_film_service
 from services.genres import GenreService, get_genre_service
-from api.v1 import GenrePartial
+from api.v1 import FilmFullInfo, GenrePartial
 
 router = APIRouter()
 
@@ -30,3 +31,17 @@ async def genres(
         page_size=page_size,
     )
     return [ GenrePartial(**genre.dict()) for genre in genres ]
+
+@router.get('/{genre_id}/films', response_model=List[FilmFullInfo])
+async def genre_films(
+    genre_id: str,
+    page_size: int = Query(50, alias="page[size]"),
+    page_number: int = Query(1, alias="page[number]"),
+    film_service: FilmService = Depends(get_film_service)
+) -> List[FilmFullInfo]:
+    films = await film_service.get_by(
+        genre_id=genre_id,
+        page_number=page_number,
+        page_size=page_size,
+    )
+    return [ FilmFullInfo(**film.dict()) for film in films ]

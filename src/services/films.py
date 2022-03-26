@@ -17,6 +17,19 @@ class FilmService(BaseService):
     def _result_class(self):
         return Film
 
+    def _query_by_genre_id(self, genre_id):
+        # TODO look for escape function or take it from php es client
+        return {
+            'nested': {
+                'path': 'genres',
+                'query': {
+                    'term': {
+                        'genres.id': genre_id
+                    }
+                }
+            }
+        }
+
     def _query_by_person_id(self, person_id):
         # TODO look for escape function or take from php es client
         def _q_nested(role, person_id):
