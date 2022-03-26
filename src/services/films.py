@@ -38,9 +38,7 @@ class FilmService(BaseService):
                     "path": role,
                     "query": {
                         "term": {
-                            "%s.id"%role: {
-                                "value": person_id
-                            }
+                            "%s.id"%role: person_id
                         }
                     }
                 }
