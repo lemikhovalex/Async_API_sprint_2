@@ -34,11 +34,11 @@ class FilmService(BaseService):
         # TODO look for escape function or take from php es client
         def _q_nested(role, person_id):
             return {
-                "nested": {
-                    "path": role,
-                    "query": {
-                        "term": {
-                            "%s.id"%role: person_id
+                'nested': {
+                    'path': role,
+                    'query': {
+                        'term': {
+                            '%s.id'%role: person_id
                         }
                     }
                 }
@@ -46,7 +46,7 @@ class FilmService(BaseService):
 
         roles = ('actors', 'directors', 'writers')
 
-        return {"bool": {"should": [_q_nested(i, person_id) for i in roles]}}
+        return {'bool': {'should': [_q_nested(i, person_id) for i in roles]}}
 
 
 @lru_cache()

@@ -20,7 +20,7 @@ class BaseService(ABC):
             method_name = '_query_by_{0}'.format('_'.join(sorted(kwargs.keys())))
             query = getattr(self, method_name)(**kwargs)
         else:
-            query = {"match_all":{}}
+            query = {'match_all':{}}
 
         if sort is not None:
             sort = {sort.lstrip('-'): {'order': 'desc' if sort.startswith('-') else 'asc'}}
@@ -32,7 +32,7 @@ class BaseService(ABC):
             size=page_size,
             sort=sort,
         )
-        return [ self._result_class().parse_obj(doc["_source"])
+        return [ self._result_class().parse_obj(doc['_source'])
             for doc in result['hits']['hits'] ]
 
     async def get_by_id(self, entity_id: str) -> Optional[BaseModel]:
@@ -56,7 +56,7 @@ class BaseService(ABC):
             )
         except exceptions.NotFoundError:
             return None
-        return self._result_class().parse_obj(doc["_source"])
+        return self._result_class().parse_obj(doc['_source'])
 
     async def _get_from_cache(self, entity_id: str) -> Optional[BaseModel]:
         data = await self.redis.get(entity_id)

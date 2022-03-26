@@ -22,8 +22,8 @@ async def genre_details(
 
 @router.get('/', response_model=List[GenrePartial])
 async def genres(
-    page_size: int = Query(50, alias="page[size]"),
-    page_number: int = Query(1, alias="page[number]"),
+    page_size: int = Query(50, alias='page[size]'),
+    page_number: int = Query(1, alias='page[number]'),
     genre_service: GenreService = Depends(get_genre_service)
 ) -> List[GenrePartial]:
     genres = await genre_service.get_by(
@@ -35,8 +35,8 @@ async def genres(
 @router.get('/{genre_id}/films', response_model=List[FilmFullInfo])
 async def genre_films(
     genre_id: str,
-    page_size: int = Query(50, alias="page[size]"),
-    page_number: int = Query(1, alias="page[number]"),
+    page_size: int = Query(50, alias='page[size]'),
+    page_number: int = Query(1, alias='page[number]'),
     film_service: FilmService = Depends(get_film_service)
 ) -> List[FilmFullInfo]:
     films = await film_service.get_by(

@@ -14,8 +14,8 @@ router = APIRouter()
 @router.get('/search', response_model=List[PersonPartial])
 async def persons(
     query: str,
-    page_size: int = Query(50, alias="page[size]"),
-    page_number: int = Query(1, alias="page[number]"),
+    page_size: int = Query(50, alias='page[size]'),
+    page_number: int = Query(1, alias='page[number]'),
     person_service: PersonService = Depends(get_person_service)
 ) -> List[PersonPartial]:
     persons = await person_service.get_by(
@@ -38,8 +38,8 @@ async def person_details(
 
 @router.get('/', response_model=List[PersonPartial])
 async def persons(
-    page_size: int = Query(50, alias="page[size]"),
-    page_number: int = Query(1, alias="page[number]"),
+    page_size: int = Query(50, alias='page[size]'),
+    page_number: int = Query(1, alias='page[number]'),
     person_service: PersonService = Depends(get_person_service)
 ) -> List[PersonPartial]:
     persons = await person_service.get_by(
@@ -51,8 +51,8 @@ async def persons(
 @router.get('/{person_id}/films', response_model=List[FilmFullInfo])
 async def person_films(
     person_id: str,
-    page_size: int = Query(50, alias="page[size]"),
-    page_number: int = Query(1, alias="page[number]"),
+    page_size: int = Query(50, alias='page[size]'),
+    page_number: int = Query(1, alias='page[number]'),
     film_service: FilmService = Depends(get_film_service)
 ) -> List[FilmFullInfo]:
     films = await film_service.get_by(
