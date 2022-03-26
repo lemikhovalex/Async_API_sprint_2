@@ -1,6 +1,5 @@
-from dataclasses import dataclass
 from functools import lru_cache
-from typing import Any, List, Optional
+from typing import List, Optional
 from uuid import UUID
 from math import ceil
 
@@ -14,7 +13,6 @@ from models.film import Film
 from .base import BaseService
 
 MAX_ES_SEARCH_FROM_SIZE = int(10)
-
 
 class FilmService(BaseService):
 
@@ -165,19 +163,27 @@ class QueryPaginator:
         self.search_from = (page_number - 1) * page_size
         self.accum_shift = 0
         self.search_after = None
+        self.pit = None
 
     async def paginate_query(self):
         n = ceil(self.search_from / MAX_ES_SEARCH_FROM_SIZE)
+        self.pit = await self.es.open_point_in_time(
+            index=self.index, keep_alive="1m"
+        )
+        self.pit = self.pit["id"]
         # make shure that search after point to the beginning of page
         for _ in range(n):
             await self._process_inner_pag_query()
 
         self.body["size"] = self.page_size
         
-        return await self.es.search(
-            index=self.index,
+        out = await self.es.search(
             body=self.body,
+            pit={"id": self.pit, "keep_alive": "1m"}
         )
+        await self.es.close_point_in_time(id=self.pit)
+        self.pit = None
+        return out
 
     async def _process_inner_pag_query(self):
         if self.search_after is None:
@@ -189,8 +195,8 @@ class QueryPaginator:
                 self.search_from - self.accum_shift
             )
         resp = await self.es.search(
-            index=self.index,
             body=self.body,
+            pit={"id": self.pit, "keep_alive": "1m"}
         )
         self.accum_shift += len(resp["hits"]["hits"])
         self.search_after = resp["hits"]["hits"][-1]["sort"]
