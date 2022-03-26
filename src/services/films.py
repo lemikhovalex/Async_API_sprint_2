@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from functools import lru_cache
-from typing import Any, List, Optional, Tuple, Generator
-from uuid import UUID, uuid1
+from typing import Any, List, Optional
+from uuid import UUID
 from math import ceil
 
 from aioredis import Redis
@@ -12,10 +12,8 @@ from elasticsearch.exceptions import NotFoundError
 from fastapi import Depends
 from models.film import Film
 from .base import BaseService
-import logging
 
-logger = logging.getLogger(__name__)
-MAX_ES_SEARCH_FROM_SIZE = int(1e3)
+MAX_ES_SEARCH_FROM_SIZE = int(10)
 
 
 class FilmService(BaseService):
@@ -56,14 +54,6 @@ class FilmService(BaseService):
         # Пытаемся получить данные о фильме из кеша, используя команду get
         # https://redis.io/commands/get
         return None
-        data = await self.redis.get(film_id)
-        if not data:
-            return None
-
-        # pydantic предоставляет удобное API для создания объекта моделей из
-        # json
-        film = ESFilm.parse_raw(data)
-        return film
 
     async def _put_film_to_cache(self, film: Film):
         # Сохраняем данные о фильме, используя команду set
@@ -71,9 +61,6 @@ class FilmService(BaseService):
         # https://redis.io/commands/set
         # pydantic позволяет сериализовать модель в json
         return
-        # await self.redis.set(
-        #     film.id, film.json(), expire=FILM_CACHE_EXPIRE_IN_SECONDS
-        # )
 
     async def get_by_query(
         self,
@@ -144,10 +131,6 @@ class FilmService(BaseService):
             pagination_shift=(page_number - 1) * page_size, size=page_size,
             es=self.elastic
         )
-        # resp = await self.elastic.search(
-        #     index=self._index_name(),
-        #     body=body,
-        # )
         results_src = [datum["_source"] for datum in resp["hits"]["hits"]]
         return [
             Film(**src)
@@ -177,7 +160,6 @@ async def paginate_es_query(
     size: int,
     es: AsyncElasticsearch
 ):
-    search_after = None
     n = ceil(pagination_shift / MAX_ES_SEARCH_FROM_SIZE)
     # make shure that search after point to the beginning of page
     pag_process_data = InnerPagQueryData(
@@ -192,12 +174,9 @@ async def paginate_es_query(
             index=index,
             pag_process=pag_process_data,
         )
-        logger.info(pag_process_data)
 
     pag_process_data.body["size"] = size
     
-    logger.info(pag_process_data)
-    logger.info(pag_process_data)
     return await es.search(
         index=index,
         body=pag_process_data.body,
@@ -211,11 +190,9 @@ async def _process_inner_pag_query(
     pag_process: InnerPagQueryData
 ):
     if pag_process.search_after is None:
-        logger.info("no search after")
         pag_process.body["size"] = min(pag_shift, MAX_ES_SEARCH_FROM_SIZE)
         pag_process.body["from"] = 0
     else:
-        logger.info("with search after")
         pag_process.body["size"] = min(
             MAX_ES_SEARCH_FROM_SIZE,
             pag_shift - pag_process.accum_shift
