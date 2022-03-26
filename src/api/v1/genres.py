@@ -43,5 +43,6 @@ async def genre_films(
         genre_id=genre_id,
         page_number=page_number,
         page_size=page_size,
+        sort='-imdb_rating',
     )
     return [ FilmFullInfo(**film.dict()) for film in films ]
