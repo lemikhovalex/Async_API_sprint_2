@@ -19,12 +19,7 @@ class PersonService(BaseService):
 
     def _query_by_name_part(self, name_part):
         # TODO look for escape function or take it from php es client
-        return {
-            'multi_match': {
-                'query': name_part,
-                'fields': ['name'],
-            },
-        }
+        return {'match': {'name': {'query': name_part}}}
 
 
 @lru_cache()
