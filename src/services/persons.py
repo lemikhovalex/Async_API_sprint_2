@@ -17,6 +17,15 @@ class PersonService(BaseService):
     def _result_class(self):
         return Person
 
+    def _query_by_name_part(self, name_part):
+        # TODO look for escape function or take it from php es client
+        return {
+            'multi_match': {
+                'query': name_part,
+                'fields': ['name'],
+            },
+        }
+
 
 @lru_cache()
 def get_person_service(
