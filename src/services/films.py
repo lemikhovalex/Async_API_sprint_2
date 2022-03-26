@@ -12,7 +12,8 @@ from fastapi import Depends
 from models.film import Film
 from .base import BaseService
 
-MAX_ES_SEARCH_FROM_SIZE = int(10)
+from core.config import MAX_ES_SEARCH_FROM_SIZE
+
 
 class FilmService(BaseService):
 
