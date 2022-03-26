@@ -14,9 +14,17 @@ class BaseService(ABC):
         self.elastic = elastic
 
     async def get_by(self, page_number: int, page_size: int, **kwargs) -> List[BaseModel]:
+        """Random query fields goes in kwargs
+        """
+        if len(kwargs):
+            method_name = '_query_by_{0}'.format('_'.join(sorted(kwargs.keys())))
+            query = getattr(self, method_name)(**kwargs)
+        else:
+            query = {"match_all":{}}
+
         result = await self.elastic.search(
             index=self._index_name(),
-            query={"match_all":{}},
+            query=query,
             from_=page_size*(page_number-1),
             size=page_size,
         )

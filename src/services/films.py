@@ -17,6 +17,26 @@ class FilmService(BaseService):
     def _result_class(self):
         return Film
 
+    def _query_by_person_id(self, person_id):
+        # TODO look for escape function or take from php es client
+        def _q_nested(role, person_id):
+            return {
+                "nested": {
+                    "path": role,
+                    "query": {
+                        "term": {
+                            "%s.id"%role: {
+                                "value": person_id
+                            }
+                        }
+                    }
+                }
+            }
+
+        roles = ('actors', 'directors', 'writers')
+
+        return {"bool": {"should": [_q_nested(i, person_id) for i in roles]}}
+
 
 @lru_cache()
 def get_film_service(
