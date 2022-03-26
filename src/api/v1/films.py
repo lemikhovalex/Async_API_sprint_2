@@ -1,9 +1,10 @@
 from http import HTTPStatus
+from typing import List, Optional
+from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
-from api.v1 import FilmFullInfo, GenrePartial, PersonPartial
+from fastapi import APIRouter, Depends, HTTPException, Query
+from api.v1 import FilmFullInfo, GenrePartial, PartialFilmInfo, PersonPartial
 from services.films import FilmService, get_film_service
-
 # Объект router, в котором регистрируем обработчики
 router = APIRouter()
 
@@ -24,7 +25,7 @@ router = APIRouter()
 
 
 # Внедряем FilmService с помощью Depends(get_film_service)
-@router.get("/{film_id}", response_model=FilmFullInfo)
+@router.get("/{film_id}/", response_model=FilmFullInfo)
 async def film_details(
     film_id: str, film_service: FilmService = Depends(get_film_service)
 ) -> FilmFullInfo:
@@ -37,7 +38,7 @@ async def film_details(
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail="film not found"
         )
-    return FilmFullInfo(**film.dict())
+    return FilmFullInfo.parse_obj(film.dict())
     # Перекладываем данные из models.Film в Film
     # Обратите внимание, что у модели бизнес-логики есть поле description
     # Которое отсутствует в модели ответа API.
@@ -45,3 +46,65 @@ async def film_details(
     # ответов API
     # вы бы предоставляли клиентам данные, которые им не нужны
     # и, возможно, данные, которые опасно возвращать
+
+
+@router.get("", response_model=List[PartialFilmInfo])
+async def film_search_general(
+    sort: Optional[str] = None,
+    page_size: int = Query(50, alias="page[size]"),
+    page_number: int = Query(1, alias="page[number]"),
+    film_service: FilmService = Depends(get_film_service),
+    filter_genre: Optional[UUID] = Query(None, alias="filter[genre]"),
+) -> List[PartialFilmInfo]:
+    return await get_all_search(
+        film_service=film_service,
+        sort=sort,
+        page_size=page_size,
+        page_number=page_number,
+        filter_genre=filter_genre,
+    )
+
+
+@router.get("/search", response_model=List[PartialFilmInfo])
+async def film_search(
+    sort: Optional[str] = None,
+    query: Optional[str] = None,
+    page_size: int = Query(50, alias="page[size]"),
+    page_number: int = Query(1, alias="page[number]"),
+    film_service: FilmService = Depends(get_film_service),
+    filter_genre: Optional[UUID] = Query(None, alias="filter[genre]"),
+) -> List[PartialFilmInfo]:
+
+    return await get_all_search(
+        film_service=film_service,
+        sort=sort,
+        query=query,
+        page_size=page_size,
+        page_number=page_number,
+        filter_genre=filter_genre,
+    )
+
+
+async def get_all_search(
+    film_service,
+    sort: Optional[str] = None,
+    query: Optional[str] = None,
+    page_size: int = Query(50, alias="page[size]"),
+    page_number: int = Query(1, alias="page[number]"),
+    filter_genre: Optional[UUID] = Query(None, alias="filter[genre]"),
+) -> List[PartialFilmInfo]:
+    out = await film_service.get_by_query(
+        query=query,
+        page_number=page_number,
+        page_size=page_size,
+        sort_by=sort,
+        genre_filter=filter_genre,
+    )
+    return [
+        PartialFilmInfo(
+            uuid=es_film.uuid,
+            title=es_film.title,
+            imdb_rating=es_film.imdb_rating,
+        )
+        for es_film in out
+    ]

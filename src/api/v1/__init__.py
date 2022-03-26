@@ -13,12 +13,18 @@ class PersonPartial(BaseModel):
     full_name: str
 
 
-class FilmFullInfo(BaseModel):
+class PartialFilmInfo(BaseModel):
     uuid: UUID
     title: str
-    imdb_rating: float
+    imdb_rating: Optional[float] = None
+
+
+class FilmFullInfo(PartialFilmInfo):
     description: Optional[str]
-    genres: List[GenrePartial]
+    genre: List[GenrePartial]
     actors: List[PersonPartial]
     writers: List[PersonPartial]
     directors: List[PersonPartial]
+
+    class Config:
+        fields = {'genre': 'genres'}

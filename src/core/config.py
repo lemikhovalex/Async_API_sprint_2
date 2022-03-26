@@ -21,3 +21,7 @@ ELASTIC_PORT = int(os.getenv("ELASTIC_PORT", 9200))
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 UVICORN_RELOAD = bool(os.getenv("UVICORN_RELOAD", False))
+
+IS_DEBUG = bool(os.getenv("DEBUG", 0))
+
+MAX_ES_SEARCH_FROM_SIZE = 5 if IS_DEBUG else 10_000
