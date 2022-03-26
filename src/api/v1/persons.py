@@ -6,13 +6,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from services.persons import PersonService, get_person_service
 
+from api.v1 import FilmFullInfo, PersonPartial
+
 router = APIRouter()
-
-
-class PersonPartial(BaseModel):
-    uuid: UUID
-    full_name: str
-
 
 @router.get('/{person_id}', response_model=PersonPartial)
 async def person_details(

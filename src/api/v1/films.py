@@ -1,12 +1,9 @@
 from http import HTTPStatus
-from typing import List, Optional
-from uuid import UUID
 
-from api.v1.genres import GenrePartial
-from api.v1.persons import PersonPartial
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from api.v1 import FilmFullInfo, GenrePartial, PersonPartial
 from services.films import FilmService, get_film_service
+
 # Объект router, в котором регистрируем обработчики
 router = APIRouter()
 
@@ -24,15 +21,6 @@ router = APIRouter()
 # В сигнатуре функции указываем тип данных, получаемый из адреса запроса
 # (film_id: str)
 # И указываем тип возвращаемого объекта — Film
-class FilmFullInfo(BaseModel):
-    uuid: UUID
-    title: str
-    imdb_rating: float
-    description: Optional[str]
-    genres: List[GenrePartial]
-    actors: List[PersonPartial]
-    writers: List[PersonPartial]
-    directors: List[PersonPartial]
 
 
 # Внедряем FilmService с помощью Depends(get_film_service)
