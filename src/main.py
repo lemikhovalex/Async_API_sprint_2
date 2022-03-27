@@ -5,6 +5,8 @@ import uvicorn as uvicorn
 from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
 
 from api.v1 import films, genres, persons
 from core import config
@@ -34,6 +36,7 @@ async def startup():
         elastic.es = AsyncElasticsearch(
             hosts=[f'http://{config.ELASTIC_HOST}:{config.ELASTIC_PORT}']
         )
+        FastAPICache.init(RedisBackend(redis.redis), prefix="fastapi-cache")
     except ConnectionRefusedError:
         pass
 
