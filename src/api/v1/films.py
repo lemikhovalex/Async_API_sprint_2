@@ -103,7 +103,6 @@ async def film_search_general(
 
 @router.get("/search", response_model=List[PartialFilmInfo])
 async def film_search(
-    sort: Optional[str] = None,
     query: Optional[str] = None,
     page_size: int = Query(50, alias="page[size]"),
     page_number: int = Query(1, alias="page[number]"),
@@ -113,7 +112,6 @@ async def film_search(
 
     return await get_all_search(
         film_service=film_service,
-        sort=sort,
         query=query,
         page_size=page_size,
         page_number=page_number,
