@@ -1,6 +1,7 @@
-from pydantic import BaseModel
 from typing import List, Optional
 from uuid import UUID
+
+from pydantic import BaseModel
 
 
 class GenrePartial(BaseModel):
@@ -27,4 +28,4 @@ class FilmFullInfo(PartialFilmInfo):
     directors: List[PersonPartial]
 
     class Config:
-        fields = {'genre': 'genres'}
+        fields = {"genre": "genres"}

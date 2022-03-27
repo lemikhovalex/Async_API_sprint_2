@@ -31,10 +31,10 @@ async def startup():
     # todo real db must be added so no try
     try:
         redis.redis = await aioredis.from_url(
-            f'redis://{config.REDIS_HOST}:{config.REDIS_PORT}'
+            f"redis://{config.REDIS_HOST}:{config.REDIS_PORT}"
         )
         elastic.es = AsyncElasticsearch(
-            hosts=[f'http://{config.ELASTIC_HOST}:{config.ELASTIC_PORT}']
+            hosts=[f"http://{config.ELASTIC_HOST}:{config.ELASTIC_PORT}"]
         )
         FastAPICache.init(RedisBackend(redis.redis), prefix="fastapi-cache")
     except ConnectionRefusedError:
@@ -59,13 +59,13 @@ app.include_router(persons.router, prefix="/api/v1/persons", tags=["person"])
 
 if __name__ == "__main__":
     uvicorn_kwargs = {
-        'host': '0.0.0.0',
-        'port': 8000,
-        'log_config': LOGGING,
-        'log_level': logging.DEBUG,
+        "host": "0.0.0.0",
+        "port": 8000,
+        "log_config": LOGGING,
+        "log_level": logging.DEBUG,
     }
     if config.UVICORN_RELOAD:
-        uvicorn_kwargs['reload'] = True
+        uvicorn_kwargs["reload"] = True
     uvicorn.run(
         "main:app",
         **uvicorn_kwargs,
