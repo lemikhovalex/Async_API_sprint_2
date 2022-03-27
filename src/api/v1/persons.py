@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from services.films import FilmService, get_film_service
 from services.persons import PersonService, get_person_service
 
-from api.v1 import FilmFullInfo, PersonPartial
+from api.v1 import PartialFilmInfo, PersonPartial
 
 router = APIRouter()
 
@@ -48,17 +48,17 @@ async def persons(
     )
     return [ PersonPartial(**person.dict()) for person in persons ]
 
-@router.get('/{person_id}/films', response_model=List[FilmFullInfo])
+@router.get('/{person_id}/films', response_model=List[PartialFilmInfo])
 async def person_films(
     person_id: str,
     page_size: int = Query(50, alias='page[size]'),
     page_number: int = Query(1, alias='page[number]'),
     film_service: FilmService = Depends(get_film_service)
-) -> List[FilmFullInfo]:
+) -> List[PartialFilmInfo]:
     films = await film_service.get_by(
         person_id=person_id,
         page_number=page_number,
         page_size=page_size,
         sort='-imdb_rating',
     )
-    return [ FilmFullInfo(**film.dict()) for film in films ]
+    return [ PartialFilmInfo(**film.dict()) for film in films ]
