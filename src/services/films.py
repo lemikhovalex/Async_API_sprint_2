@@ -38,8 +38,6 @@ class FilmService(BaseService):
 
         return {"bool": {"should": [_q_nested(i, person_id) for i in roles]}}
 
-    # get_by_id возвращает объект фильма. Он опционален, так как фильм может
-    # отсутствовать в базе
     async def get_by_id(self, film_id: str) -> Optional[Film]:
         out = None
         try:

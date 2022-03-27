@@ -9,26 +9,9 @@ from api.v1 import FilmFullInfo, PartialFilmInfo
 from core.config import REDIS_CACHE_EXPIRE
 from services.films import FilmService, get_film_service
 
-# Объект router, в котором регистрируем обработчики
 router = APIRouter()
 
 
-# FastAPI в качестве моделей использует библиотеку pydantic
-# https://pydantic-docs.helpmanual.io
-# У неё есть встроенные механизмы валидации, сериализации и десериализации
-# Также она основана на дата-классах
-# Модель ответа API
-# todo import from module with shared info
-# С помощью декоратора регистрируем обработчик film_details
-# На обработку запросов по адресу <some_prefix>/some_id
-# Позже подключим роутер к корневому роутеру
-# И адрес запроса будет выглядеть так — /api/v1/film/some_id
-# В сигнатуре функции указываем тип данных, получаемый из адреса запроса
-# (film_id: str)
-# И указываем тип возвращаемого объекта — Film
-
-
-# Внедряем FilmService с помощью Depends(get_film_service)
 @router.get("/{film_id}/", response_model=FilmFullInfo)
 @cache(expire=REDIS_CACHE_EXPIRE)
 async def film_details(
@@ -36,19 +19,8 @@ async def film_details(
 ) -> FilmFullInfo:
     film = await film_service.get_by_id(film_id)
     if not film:
-        # Если фильм не найден, отдаём 404 статус
-        # Желательно пользоваться уже определёнными HTTP-статусами, которые
-        # содержат enum
-        # Такой код будет более поддерживаемым
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="film not found")
     return FilmFullInfo.parse_obj(film.dict())
-    # Перекладываем данные из models.Film в Film
-    # Обратите внимание, что у модели бизнес-логики есть поле description
-    # Которое отсутствует в модели ответа API.
-    # Если бы использовалась общая модель для бизнес-логики и формирования
-    # ответов API
-    # вы бы предоставляли клиентам данные, которые им не нужны
-    # и, возможно, данные, которые опасно возвращать
 
 
 @router.get("", response_model=List[PartialFilmInfo])
