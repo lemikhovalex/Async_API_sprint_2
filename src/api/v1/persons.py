@@ -39,7 +39,7 @@ async def person_details(
     return PersonPartial(**person.dict())
 
 
-@router.get("/", response_model=List[PersonPartial])
+@router.get("", response_model=List[PersonPartial])
 @cache(expire=REDIS_CACHE_EXPIRE)
 async def persons(
     page_size: int = Query(50, alias="page[size]"),
