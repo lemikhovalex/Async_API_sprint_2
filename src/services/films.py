@@ -141,20 +141,19 @@ class FilmService(BaseService):
                 }
             )
 
+        order = "desc"
         if sort_by is not None:
-            order = "desc"
             if sort_by.startswith("-"):
                 order = "asc"
                 sort_by = sort_by[1:]
-            body["sort"][0][sort_by] = {"order": order}
-        else:
-            body["sort"][0]["imdb_rating"] = {"order": "asc"}
+            body["sort"].insert(0, {sort_by: {"order": order}})
+
         body['sort'].extend(
             [
                 {_sf: {}} for _sf in unique_sort_fields
             ]
-            
         )
+
         paginator = QueryPaginator(
             body=body, 
             es=self.elastic,
