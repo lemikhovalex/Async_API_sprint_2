@@ -2,6 +2,7 @@ from http import HTTPStatus
 from typing import List
 from uuid import UUID
 
+from fastapi_cache.decorator import cache
 from fastapi import APIRouter, Depends, HTTPException, Query
 from services.films import FilmService, get_film_service
 from services.genres import GenreService, get_genre_service
