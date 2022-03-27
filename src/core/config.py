@@ -25,3 +25,4 @@ UVICORN_RELOAD = bool(os.getenv("UVICORN_RELOAD", False))
 IS_DEBUG = bool(os.getenv("DEBUG", 0))
 
 MAX_ES_SEARCH_FROM_SIZE = 5 if IS_DEBUG else 10_000
+REDIS_CACHE_EXPIRE = 60

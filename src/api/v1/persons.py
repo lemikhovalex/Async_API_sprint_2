@@ -2,16 +2,20 @@ from http import HTTPStatus
 from typing import List
 from uuid import UUID
 
+from fastapi_cache.decorator import cache
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
+from fastapi_cache.decorator import cache
 from services.films import FilmService, get_film_service
 from services.persons import PersonService, get_person_service
+from core.config import REDIS_CACHE_EXPIRE
 
 from api.v1 import PartialFilmInfo, PersonPartial
 
 router = APIRouter()
 
 @router.get('/search', response_model=List[PersonPartial])
+@cache(expire=REDIS_CACHE_EXPIRE)
 async def persons(
     query: str,
     page_size: int = Query(50, alias='page[size]'),
@@ -26,6 +30,7 @@ async def persons(
     return [ PersonPartial(**person.dict()) for person in persons ]
 
 @router.get('/{person_id}', response_model=PersonPartial)
+@cache(expire=REDIS_CACHE_EXPIRE)
 async def person_details(
     person_id: str, person_service: PersonService = Depends(get_person_service)
 ) -> PersonPartial:
@@ -37,6 +42,7 @@ async def person_details(
     return PersonPartial(**person.dict())
 
 @router.get('/', response_model=List[PersonPartial])
+@cache(expire=REDIS_CACHE_EXPIRE)
 async def persons(
     page_size: int = Query(50, alias='page[size]'),
     page_number: int = Query(1, alias='page[number]'),
@@ -49,6 +55,7 @@ async def persons(
     return [ PersonPartial(**person.dict()) for person in persons ]
 
 @router.get('/{person_id}/films', response_model=List[PartialFilmInfo])
+@cache(expire=REDIS_CACHE_EXPIRE)
 async def person_films(
     person_id: str,
     page_size: int = Query(50, alias='page[size]'),
