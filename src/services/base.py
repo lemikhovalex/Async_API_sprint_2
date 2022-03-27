@@ -59,17 +59,10 @@ class BaseService(ABC):
         return self._result_class().parse_obj(doc['_source'])
 
     async def _get_from_cache(self, entity_id: str) -> Optional[BaseModel]:
-        data = await self.redis.get(entity_id)
-        if not data:
-            return None
-
-        result = self._result_class().parse_raw(data)
-        return result
-
+        return None
+        
     async def _put_to_cache(self, entity: BaseModel):
-        await self.redis.set(
-            str(entity.uuid), entity.json(), ex=CACHE_EXPIRE_IN_SECONDS
-        )
+        return None
 
     @abstractmethod
     def _index_name(self):
