@@ -115,10 +115,8 @@ class FilmService(BaseService):
             if sort_by.startswith("-"):
                 order = "asc"
                 sort_by = sort_by[1:]
-        else:
-            sort_by = "imdb_rating"
+            body["sort"].insert(0, {sort_by: {"order": order}})
 
-        body["sort"].insert(0, {sort_by: {"order": order}})
         body['sort'].extend(
             [
                 {_sf: {}} for _sf in unique_sort_fields
