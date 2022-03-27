@@ -12,7 +12,7 @@ from services.films import FilmService, get_film_service
 router = APIRouter()
 
 
-@router.get("/{film_id}/", response_model=FilmFullInfo)
+@router.get("/{film_id}", response_model=FilmFullInfo)
 @cache(expire=REDIS_CACHE_EXPIRE)
 async def film_details(
     film_id: str, film_service: FilmService = Depends(get_film_service)

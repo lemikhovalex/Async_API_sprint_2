@@ -23,7 +23,7 @@ async def genre_details(
     return GenrePartial(**genre.dict())
 
 
-@router.get("/", response_model=List[GenrePartial])
+@router.get("", response_model=List[GenrePartial])
 @cache(expire=REDIS_CACHE_EXPIRE)
 async def genres(
     page_size: int = Query(50, alias="page[size]"),
