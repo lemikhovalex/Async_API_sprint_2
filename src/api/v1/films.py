@@ -5,9 +5,10 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi_cache.decorator import cache
 
-from api.v1 import FilmFullInfo, GenrePartial, PartialFilmInfo, PersonPartial
-from services.films import FilmService, get_film_service
+from api.v1 import FilmFullInfo, PartialFilmInfo
 from core.config import REDIS_CACHE_EXPIRE
+from services.films import FilmService, get_film_service
+
 # Объект router, в котором регистрируем обработчики
 router = APIRouter()
 
@@ -39,9 +40,7 @@ async def film_details(
         # Желательно пользоваться уже определёнными HTTP-статусами, которые
         # содержат enum
         # Такой код будет более поддерживаемым
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail="film not found"
-        )
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="film not found")
     return FilmFullInfo.parse_obj(film.dict())
     # Перекладываем данные из models.Film в Film
     # Обратите внимание, что у модели бизнес-логики есть поле description

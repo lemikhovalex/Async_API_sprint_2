@@ -1,6 +1,5 @@
 from typing import List, Optional
 
-
 from .base import BaseModel
 from .genre import IDNameGenre
 from .person import IDNamePerson
