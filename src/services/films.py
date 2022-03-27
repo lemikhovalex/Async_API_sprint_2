@@ -23,6 +23,37 @@ class FilmService(BaseService):
     def _result_class(self):
         return Film
 
+    def _query_by_genre_id(self, genre_id):
+        # TODO look for escape function or take it from php es client
+        return {
+            'nested': {
+                'path': 'genres',
+                'query': {
+                    'term': {
+                        'genres.id': genre_id
+                    }
+                }
+            }
+        }
+
+    def _query_by_person_id(self, person_id):
+        # TODO look for escape function or take from php es client
+        def _q_nested(role, person_id):
+            return {
+                'nested': {
+                    'path': role,
+                    'query': {
+                        'term': {
+                            '%s.id'%role: person_id
+                        }
+                    }
+                }
+            }
+
+        roles = ('actors', 'directors', 'writers')
+
+        return {'bool': {'should': [_q_nested(i, person_id) for i in roles]}}
+
     # get_by_id возвращает объект фильма. Он опционален, так как фильм может
     # отсутствовать в базе
     async def get_by_id(self, film_id: str) -> Optional[Film]:

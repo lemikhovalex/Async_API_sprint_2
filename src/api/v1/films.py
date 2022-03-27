@@ -1,14 +1,9 @@
 from http import HTTPStatus
-from lib2to3.pgen2.token import OP
-from typing import Dict, List, Optional
+from typing import List, Optional
 from uuid import UUID
 
-from api.v1.genres import GenrePartial
-from api.v1.persons import PersonPartial
 from fastapi import APIRouter, Depends, HTTPException, Query
-from fastapi.requests import Request
-from pydantic import BaseModel
-from models.person import IDNamePerson
+from api.v1 import FilmFullInfo, GenrePartial, PartialFilmInfo, PersonPartial
 from services.films import FilmService, get_film_service
 # Объект router, в котором регистрируем обработчики
 router = APIRouter()
@@ -29,37 +24,6 @@ router = APIRouter()
 # И указываем тип возвращаемого объекта — Film
 
 
-class PartialFilmInfo(BaseModel):
-    id: UUID
-    title: str
-    imdb_rating: Optional[float] = None
-    
-    class Config:
-        fields = {'uuid': 'id'}
-
-
-class Genre(BaseModel):
-    id: UUID
-    name: str
-
-    class Config:
-        fields = {'uuid': 'id'}
-
-
-class FilmFullInfo(BaseModel):
-    id: UUID
-    title: str
-    imdb_rating: Optional[float]
-    description: Optional[str]
-    genre: List[Genre]
-    actors: List[IDNamePerson]
-    writers: List[IDNamePerson]
-    directors: List[IDNamePerson]
-    
-    class Config:
-        fields = {'genre': 'genres'}
-
-
 # Внедряем FilmService с помощью Depends(get_film_service)
 @router.get("/{film_id}/", response_model=FilmFullInfo)
 async def film_details(
@@ -74,7 +38,7 @@ async def film_details(
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail="film not found"
         )
-    return FilmFullInfo.parse_obj(film.dict(by_alias=True))
+    return FilmFullInfo.parse_obj(film.dict())
     # Перекладываем данные из models.Film в Film
     # Обратите внимание, что у модели бизнес-логики есть поле description
     # Которое отсутствует в модели ответа API.
@@ -138,7 +102,7 @@ async def get_all_search(
     )
     return [
         PartialFilmInfo(
-            id=es_film.uuid,
+            uuid=es_film.uuid,
             title=es_film.title,
             imdb_rating=es_film.imdb_rating,
         )

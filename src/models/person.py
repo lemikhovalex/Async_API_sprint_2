@@ -11,5 +11,6 @@ class IDNamePerson(BaseModel):
 
 
 class Person(IDNamePerson):
-    role: str
-    film_ids: List[str]
+    pass
+    # role: str
+    # film_ids: List[str]
