@@ -3,8 +3,11 @@ from typing import List, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi_cache.decorator import cache
+
 from api.v1 import FilmFullInfo, GenrePartial, PartialFilmInfo, PersonPartial
 from services.films import FilmService, get_film_service
+from core.config import REDIS_CACHE_EXPIRE
 # Объект router, в котором регистрируем обработчики
 router = APIRouter()
 
@@ -26,6 +29,7 @@ router = APIRouter()
 
 # Внедряем FilmService с помощью Depends(get_film_service)
 @router.get("/{film_id}/", response_model=FilmFullInfo)
+@cache(expire=REDIS_CACHE_EXPIRE)
 async def film_details(
     film_id: str, film_service: FilmService = Depends(get_film_service)
 ) -> FilmFullInfo:
@@ -49,6 +53,7 @@ async def film_details(
 
 
 @router.get("", response_model=List[PartialFilmInfo])
+@cache(expire=REDIS_CACHE_EXPIRE)
 async def film_search_general(
     sort: Optional[str] = None,
     page_size: int = Query(50, alias="page[size]"),
@@ -66,6 +71,7 @@ async def film_search_general(
 
 
 @router.get("/search", response_model=List[PartialFilmInfo])
+@cache(expire=REDIS_CACHE_EXPIRE)
 async def film_search(
     query: Optional[str] = None,
     page_size: int = Query(50, alias="page[size]"),
