@@ -1,3 +1,4 @@
+from functools import lru_cache
 from typing import List, Optional
 from uuid import UUID
 
@@ -5,6 +6,7 @@ from fastapi import Query
 from pydantic import BaseModel
 
 
+@lru_cache()
 def get_page_params(
     size: int = Query(50, alias="page[size]"),
     number: int = Query(1, alias="page[number]"),
