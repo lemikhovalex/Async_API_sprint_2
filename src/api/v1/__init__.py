@@ -1,7 +1,15 @@
 from typing import List, Optional
 from uuid import UUID
 
+from fastapi import Query
 from pydantic import BaseModel
+
+
+def get_page_params(
+    size: int = Query(50, alias="page[size]"),
+    number: int = Query(1, alias="page[number]"),
+):
+    return {"size": size, "number": number}
 
 
 class GenrePartial(BaseModel):
