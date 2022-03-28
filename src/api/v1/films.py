@@ -5,7 +5,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi_cache.decorator import cache
 
-from api.v1 import FilmFullInfo, PartialFilmInfo
+from api.v1 import FilmFullInfo, PartialFilmInfo, get_page_params
 from core.config import REDIS_CACHE_EXPIRE
 from services.films import FilmService, get_film_service
 
@@ -27,16 +27,14 @@ async def film_details(
 @cache(expire=REDIS_CACHE_EXPIRE)
 async def film_search_general(
     sort: Optional[str] = None,
-    page_size: int = Query(50, alias="page[size]"),
-    page_number: int = Query(1, alias="page[number]"),
+    page: dict = Depends(get_page_params),
     film_service: FilmService = Depends(get_film_service),
     filter_genre: Optional[UUID] = Query(None, alias="filter[genre]"),
 ) -> List[PartialFilmInfo]:
     return await get_all_search(
         film_service=film_service,
         sort=sort,
-        page_size=page_size,
-        page_number=page_number,
+        page=page,
         filter_genre=filter_genre,
     )
 
@@ -45,8 +43,7 @@ async def film_search_general(
 @cache(expire=REDIS_CACHE_EXPIRE)
 async def film_search(
     query: Optional[str] = None,
-    page_size: int = Query(50, alias="page[size]"),
-    page_number: int = Query(1, alias="page[number]"),
+    page: dict = Depends(get_page_params),
     film_service: FilmService = Depends(get_film_service),
     filter_genre: Optional[UUID] = Query(None, alias="filter[genre]"),
 ) -> List[PartialFilmInfo]:
@@ -54,24 +51,22 @@ async def film_search(
     return await get_all_search(
         film_service=film_service,
         query=query,
-        page_size=page_size,
-        page_number=page_number,
+        page=page,
         filter_genre=filter_genre,
     )
 
 
 async def get_all_search(
     film_service,
+    page: dict,
     sort: Optional[str] = None,
     query: Optional[str] = None,
-    page_size: int = Query(50, alias="page[size]"),
-    page_number: int = Query(1, alias="page[number]"),
     filter_genre: Optional[UUID] = Query(None, alias="filter[genre]"),
 ) -> List[PartialFilmInfo]:
     out = await film_service.get_by_query(
         query=query,
-        page_number=page_number,
-        page_size=page_size,
+        page_number=page["number"],
+        page_size=page["size"],
         sort_by=sort,
         genre_filter=filter_genre,
     )

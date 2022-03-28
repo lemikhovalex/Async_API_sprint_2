@@ -1,10 +1,10 @@
 from http import HTTPStatus
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi_cache.decorator import cache
 
-from api.v1 import GenrePartial, PartialFilmInfo
+from api.v1 import GenrePartial, PartialFilmInfo, get_page_params
 from core.config import REDIS_CACHE_EXPIRE
 from services.films import FilmService, get_film_service
 from services.genres import GenreService, get_genre_service
@@ -26,13 +26,12 @@ async def genre_details(
 @router.get("", response_model=List[GenrePartial])
 @cache(expire=REDIS_CACHE_EXPIRE)
 async def genres(
-    page_size: int = Query(50, alias="page[size]"),
-    page_number: int = Query(1, alias="page[number]"),
+    page: dict = Depends(get_page_params),
     genre_service: GenreService = Depends(get_genre_service),
 ) -> List[GenrePartial]:
     genres = await genre_service.get_by(
-        page_number=page_number,
-        page_size=page_size,
+        page_number=page["number"],
+        page_size=page["size"],
     )
     return [GenrePartial(**genre.dict()) for genre in genres]
 
@@ -41,14 +40,13 @@ async def genres(
 @cache(expire=REDIS_CACHE_EXPIRE)
 async def genre_films(
     genre_id: str,
-    page_size: int = Query(50, alias="page[size]"),
-    page_number: int = Query(1, alias="page[number]"),
+    page: dict = Depends(get_page_params),
     film_service: FilmService = Depends(get_film_service),
 ) -> List[PartialFilmInfo]:
     films = await film_service.get_by(
         genre_id=genre_id,
-        page_number=page_number,
-        page_size=page_size,
+        page_number=page["number"],
+        page_size=page["size"],
         sort="-imdb_rating",
     )
     return [PartialFilmInfo(**film.dict()) for film in films]
