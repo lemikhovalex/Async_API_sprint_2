@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi_cache.decorator import cache
 
 from api.v1 import FilmFullInfo, PartialFilmInfo, get_page_params
+from api.v1.messages import FILM_NOT_FOUND
 from core.config import REDIS_CACHE_EXPIRE
 from services.films import FilmService, get_film_service
 
@@ -51,7 +52,7 @@ async def film_details(
 ) -> FilmFullInfo:
     film = await film_service.get_by_id(film_id)
     if not film:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="film not found")
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=FILM_NOT_FOUND)
     return FilmFullInfo.parse_obj(film.dict())
 
 
