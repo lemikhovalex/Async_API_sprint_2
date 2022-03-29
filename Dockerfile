@@ -14,4 +14,4 @@ RUN apk add -U --no-cache build-base && \
 
 COPY ./src /app
 USER app
-CMD ["python", "main.py"]
+CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "main:app"]
