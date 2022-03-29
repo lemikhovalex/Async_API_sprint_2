@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Type
 
 from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
@@ -10,10 +11,10 @@ from .base import BaseService
 
 
 class GenreService(BaseService):
-    def _index_name(self):
+    def _index_name(self) -> str:
         return "genres"
 
-    def _result_class(self):
+    def _result_class(self) -> Type[Genre]:
         return Genre
 
 
