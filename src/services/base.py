@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List, Optional, Type
+from uuid import UUID
 
 from elasticsearch import AsyncElasticsearch, exceptions
 
@@ -13,7 +14,7 @@ class BaseService(ABC):
         self.elastic = elastic
 
     async def get_by(
-        self, page_number: int, page_size: int, sort: str = None, **kwargs
+        self, page_number: int, page_size: int, sort: Optional[str] = None, **kwargs
     ) -> List[BaseModel]:
         """Random query fields goes in kwargs"""
         if len(kwargs):
@@ -21,9 +22,9 @@ class BaseService(ABC):
             query = getattr(self, method_name)(**kwargs)
         else:
             query = {"match_all": {}}
-
+        sort_for_es = None
         if sort is not None:
-            sort = {
+            sort_for_es = {
                 sort.lstrip("-"): {"order": "desc" if sort.startswith("-") else "asc"}
             }
 
@@ -32,27 +33,27 @@ class BaseService(ABC):
             query=query,
             from_=page_size * (page_number - 1),
             size=page_size,
-            sort=sort,
+            sort=sort_for_es,
         )
         return [
             self._result_class().parse_obj(doc["_source"])
             for doc in result["hits"]["hits"]
         ]
 
-    async def get_by_id(self, entity_id: str) -> Optional[BaseModel]:
+    async def get_by_id(self, entity_id: UUID) -> Optional[BaseModel]:
         try:
             doc = await self.elastic.get(
                 index=self._index_name(),
-                id=entity_id,
+                id=str(entity_id),
             )
         except exceptions.NotFoundError:
             return None
         return self._result_class().parse_obj(doc["_source"])
 
     @abstractmethod
-    def _index_name(self):
+    def _index_name(self) -> str:
         pass
 
     @abstractmethod
-    def _result_class(self):
+    def _result_class(self) -> Type[BaseModel]:
         pass

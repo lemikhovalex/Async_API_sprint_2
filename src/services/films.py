@@ -1,6 +1,6 @@
 from functools import lru_cache
 from math import ceil
-from typing import List, Optional
+from typing import List, Optional, Type
 from uuid import UUID
 
 from elasticsearch import AsyncElasticsearch
@@ -15,19 +15,19 @@ from .base import BaseService
 
 
 class FilmService(BaseService):
-    def _index_name(self):
+    def _index_name(self) -> str:
         return "movies"
 
-    def _result_class(self):
+    def _result_class(self) -> Type[Film]:
         return Film
 
-    def _query_by_genre_id(self, genre_id):
+    def _query_by_genre_id(self, genre_id: UUID) -> dict:
         # TODO look for escape function or take it from php es client
         return {
             "nested": {"path": "genres", "query": {"term": {"genres.id": genre_id}}}
         }
 
-    def _query_by_person_id(self, person_id):
+    def _query_by_person_id(self, person_id: UUID) -> dict:
         # TODO look for escape function or take from php es client
         def _q_nested(role, person_id):
             return {
@@ -38,10 +38,10 @@ class FilmService(BaseService):
 
         return {"bool": {"should": [_q_nested(i, person_id) for i in roles]}}
 
-    async def get_by_id(self, film_id: str) -> Optional[Film]:
+    async def get_by_id(self, film_id: UUID) -> Optional[Film]:
         out = None
         try:
-            doc = await self.elastic.get(index=self._index_name(), id=film_id)
+            doc = await self.elastic.get(index=self._index_name(), id=str(film_id))
             out = Film(**doc["_source"])
         except NotFoundError:
             pass
@@ -135,7 +135,7 @@ class QueryPaginator:
         self.search_after = None
         self.pit = None
 
-    async def paginate_query(self):
+    async def paginate_query(self) -> dict:
         n = ceil(self.search_from / MAX_ES_SEARCH_FROM_SIZE)
         self.pit = await self.es.open_point_in_time(index=self.index, keep_alive="1m")
         self.pit = self.pit["id"]
@@ -152,7 +152,7 @@ class QueryPaginator:
         self.pit = None
         return out
 
-    async def _process_inner_pag_query(self):
+    async def _process_inner_pag_query(self) -> None:
         if self.search_after is None:
             self.body["size"] = min(self.search_from, MAX_ES_SEARCH_FROM_SIZE)
             self.body["from"] = 0

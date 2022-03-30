@@ -1,10 +1,12 @@
 from http import HTTPStatus
 from typing import List
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_cache.decorator import cache
 
 from api.v1 import GenrePartial, PartialFilmInfo, get_page_params
+from api.v1.messages import GENRE_NOT_FOUND
 from core.config import REDIS_CACHE_EXPIRE
 from services.films import FilmService, get_film_service
 from services.genres import GenreService, get_genre_service
@@ -15,11 +17,11 @@ router = APIRouter()
 @router.get("/{genre_id}", response_model=GenrePartial)
 @cache(expire=REDIS_CACHE_EXPIRE)
 async def genre_details(
-    genre_id: str, genre_service: GenreService = Depends(get_genre_service)
+    genre_id: UUID, genre_service: GenreService = Depends(get_genre_service)
 ) -> GenrePartial:
     genre = await genre_service.get_by_id(genre_id)
     if not genre:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="genre not found")
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=GENRE_NOT_FOUND)
     return GenrePartial(**genre.dict())
 
 

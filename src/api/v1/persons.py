@@ -1,10 +1,12 @@
 from http import HTTPStatus
 from typing import List
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_cache.decorator import cache
 
 from api.v1 import PartialFilmInfo, PersonPartial, get_page_params
+from api.v1.messages import PERSON_NOT_FOUND
 from core.config import REDIS_CACHE_EXPIRE
 from services.films import FilmService, get_film_service
 from services.persons import PersonService, get_person_service
@@ -30,11 +32,11 @@ async def persons_search(
 @router.get("/{person_id}", response_model=PersonPartial)
 @cache(expire=REDIS_CACHE_EXPIRE)
 async def person_details(
-    person_id: str, person_service: PersonService = Depends(get_person_service)
+    person_id: UUID, person_service: PersonService = Depends(get_person_service)
 ) -> PersonPartial:
     person = await person_service.get_by_id(person_id)
     if not person:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="person not found")
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=PERSON_NOT_FOUND)
     return PersonPartial(**person.dict())
 
 
