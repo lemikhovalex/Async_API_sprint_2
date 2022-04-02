@@ -63,5 +63,5 @@ async def fill_es_index(es: AsyncElasticsearch, index: str):
         {"_index": index, "_id": datum["id"], "_source": datum} for datum in data
     ]
     await async_bulk(client=es, actions=actions)
-    await asyncio.sleep(5)
+    # await asyncio.sleep(5)
     return
