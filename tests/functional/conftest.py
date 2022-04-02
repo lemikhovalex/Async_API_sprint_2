@@ -1,8 +1,7 @@
 import asyncio
 import json
-from codecs import ignore_errors
 from http import HTTPStatus
-from typing import AsyncGenerator
+from typing import AsyncGenerator, List
 
 import pytest
 import pytest_asyncio
@@ -36,32 +35,24 @@ async def es_connection() -> AsyncGenerator[AsyncElasticsearch, None]:
 async def filled_es(
     es_connection: AsyncElasticsearch,
 ) -> AsyncGenerator[AsyncElasticsearch, None]:
-    await asyncio.gather(
-        *[
-            fill_es_index(es=es_connection, index=idx)
-            for idx in [
-                "genres",
-                "persons",
-                "movies",
-            ]
-        ]
-    )
+    indecies = ["genres", "persons", "movies"]
+    actions = []
+    for idx in indecies:
+        await es_connection.indices.create(
+            index=idx,
+            settings=constants.settings,
+            mappings=getattr(constants, f"mappings_{idx}"),
+            ignore=HTTPStatus.BAD_REQUEST,
+        )
+        actions.extend(actions_for_es_bulk(idx))
+    await async_bulk(client=es_connection, actions=actions)
+    await asyncio.sleep(5)
 
     yield es_connection
 
 
-async def fill_es_index(es: AsyncElasticsearch, index: str):
-    await es.indices.create(
-        index=index,
-        settings=constants.settings,
-        mappings=getattr(constants, f"mappings_{index}"),
-        ignore=HTTPStatus.BAD_REQUEST,
-    )
+def actions_for_es_bulk(index: str) -> List[dict]:
+
     with open(f"test_data/{index}.json", "r") as f:
         data = json.load(f)
-    actions = [
-        {"_index": index, "_id": datum["id"], "_source": datum} for datum in data
-    ]
-    await async_bulk(client=es, actions=actions)
-    # await asyncio.sleep(5)
-    return
+    return [{"_index": index, "_id": datum["id"], "_source": datum} for datum in data]
