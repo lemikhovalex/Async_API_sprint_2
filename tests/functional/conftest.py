@@ -45,10 +45,16 @@ async def filled_es(
             ignore=HTTPStatus.BAD_REQUEST,
         )
         actions.extend(actions_for_es_bulk(idx))
-    await async_bulk(client=es_connection, actions=actions)
     await asyncio.sleep(5)
+    await async_bulk(client=es_connection, actions=actions)
 
     yield es_connection
+
+    for idx in indecies:
+        es_connection.indices.delete(
+            index=idx,
+            ignore=[HTTPStatus.BAD_REQUEST, HTTPStatus.NOT_FOUND],
+        )
 
 
 def actions_for_es_bulk(index: str) -> List[dict]:
