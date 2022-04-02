@@ -1,4 +1,4 @@
-FROM python:3.9-alpine
+FROM python:3.8-alpine
 
 WORKDIR /app
 RUN addgroup -S app && adduser -S app app
@@ -11,3 +11,5 @@ COPY ./requirements.txt /app
 RUN apk add -U --no-cache build-base && \
     pip install -r /app/requirements.txt && \
     apk del build-base
+
+WORKDIR /app
