@@ -21,13 +21,18 @@ services:
       - GUNICORN_CMD_ARGS
     networks:
       - async_api_test
+    depends_on:
+      - redis
+      - elasticsearch
 
   tests:
     build: .
     networks:
       - async_api_test
     entrypoint: >
-      sh -c "cd /app && python3 waiting.py  && pytest src"
+      sh -c "cd /app && python3 waiting.py  && python3 -m pytest src/"
+    depends_on:
+      - api
 
 networks:
   async_api_test:
