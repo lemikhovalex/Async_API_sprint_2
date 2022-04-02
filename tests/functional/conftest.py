@@ -5,6 +5,7 @@ from http import HTTPStatus
 from typing import AsyncGenerator
 
 import pytest
+import pytest_asyncio
 from elasticsearch import AsyncElasticsearch
 from elasticsearch.helpers import async_bulk
 from test_data import constants
@@ -16,12 +17,10 @@ SETTINGS = TestSettings()
 
 @pytest.fixture(scope="session")
 def event_loop():
-    _loop = asyncio.get_event_loop()
-    yield _loop
-    _loop.close()
+    return asyncio.get_event_loop()
 
 
-@pytest.fixture(scope="session")
+@pytest_asyncio.fixture(scope="session")
 async def es_connection() -> AsyncGenerator[AsyncElasticsearch, None]:
     """
     Создаёт файл и удаляет его, даже если сам тест упал в ошибку
@@ -33,7 +32,7 @@ async def es_connection() -> AsyncGenerator[AsyncElasticsearch, None]:
     await es.close()
 
 
-@pytest.fixture(scope="session")
+@pytest_asyncio.fixture(scope="session")
 async def filled_es(
     es_connection: AsyncElasticsearch,
 ) -> AsyncGenerator[AsyncElasticsearch, None]:
@@ -50,17 +49,6 @@ async def filled_es(
 
     yield es_connection
 
-    await asyncio.gather(
-        *[
-            es_connection.indices.delete(index=idx)
-            for idx in [
-                "genres",
-                "persons",
-                "movies",
-            ]
-        ]
-    )
-
 
 async def fill_es_index(es: AsyncElasticsearch, index: str):
     await es.indices.create(
@@ -69,10 +57,11 @@ async def fill_es_index(es: AsyncElasticsearch, index: str):
         mappings=getattr(constants, f"mappings_{index}"),
         ignore=HTTPStatus.BAD_REQUEST,
     )
-    # await asyncio.sleep(5)
     with open(f"test_data/{index}.json", "r") as f:
         data = json.load(f)
     actions = [
         {"_index": index, "_id": datum["id"], "_source": datum} for datum in data
     ]
     await async_bulk(client=es, actions=actions)
+    await asyncio.sleep(5)
+    return
