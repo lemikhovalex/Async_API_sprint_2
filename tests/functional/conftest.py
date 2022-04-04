@@ -1,15 +1,18 @@
 import asyncio
 import json
+from dataclasses import dataclass
 from http import HTTPStatus
-from typing import AsyncGenerator, List
+from typing import AsyncGenerator, List, Optional
 
+import aiohttp
 import pytest
 import pytest_asyncio
 from elasticsearch import AsyncElasticsearch
 from elasticsearch.helpers import async_bulk
-from test_data import constants
+from multidict import CIMultiDictProxy
 
 from .settings import TestSettings
+from .test_data import constants
 
 SETTINGS = TestSettings()
 
@@ -67,6 +70,35 @@ async def filled_es(
             ignore=[HTTPStatus.BAD_REQUEST, HTTPStatus.NOT_FOUND],
         )
     await _es_connection.close()
+
+
+@dataclass
+class HTTPResponse:
+    body: dict
+    headers: CIMultiDictProxy[str]
+    status: int
+
+
+@pytest_asyncio.fixture(scope="session")
+async def session():
+    session = aiohttp.ClientSession()
+    yield session
+    await session.close()
+
+
+@pytest_asyncio.fixture
+def make_get_request(session):
+    async def inner(method: str, params: Optional[dict] = None) -> HTTPResponse:
+        params = params or {}
+        url = f"http://{SETTINGS.api_host}:{SETTINGS.api_port}/api/v1{method}"
+        async with session.get(url, params=params) as response:
+            return HTTPResponse(
+                body=await response.json(),
+                headers=response.headers,
+                status=response.status,
+            )
+
+    return inner
 
 
 def actions_for_es_bulk(index: str) -> List[dict]:
