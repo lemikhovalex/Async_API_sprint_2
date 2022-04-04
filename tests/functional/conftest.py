@@ -22,7 +22,7 @@ def event_loop():
 
 
 @pytest_asyncio.fixture(scope="session")
-async def es_connection() -> AsyncGenerator[AsyncElasticsearch, None]:
+async def _es_connection() -> AsyncGenerator[AsyncElasticsearch, None]:
     """
     Создаёт файл и удаляет его, даже если сам тест упал в ошибку
     """
@@ -35,12 +35,12 @@ async def es_connection() -> AsyncGenerator[AsyncElasticsearch, None]:
 
 @pytest_asyncio.fixture(scope="session")
 async def filled_es(
-    es_connection: AsyncElasticsearch,
+    _es_connection: AsyncElasticsearch,
 ) -> AsyncGenerator[AsyncElasticsearch, None]:
     indecies = ["genres", "persons", "movies"]
     await asyncio.gather(
         *[
-            es_connection.indices.create(
+            _es_connection.indices.create(
                 index=idx,
                 settings=constants.settings,
                 mappings=getattr(constants, f"mappings_{idx}"),
@@ -53,20 +53,20 @@ async def filled_es(
     for idx in indecies:
         actions.extend(actions_for_es_bulk(idx))
 
-    await async_bulk(client=es_connection, actions=actions)
+    await async_bulk(client=_es_connection, actions=actions)
 
     await asyncio.gather(
-        *[es_connection.indices.refresh(index=idx) for idx in indecies]
+        *[_es_connection.indices.refresh(index=idx) for idx in indecies]
     )
 
-    yield es_connection
+    yield _es_connection
 
     for idx in indecies:
-        await es_connection.indices.delete(
+        await _es_connection.indices.delete(
             index=idx,
             ignore=[HTTPStatus.BAD_REQUEST, HTTPStatus.NOT_FOUND],
         )
-    await es_connection.close()
+    await _es_connection.close()
 
 
 def actions_for_es_bulk(index: str) -> List[dict]:
