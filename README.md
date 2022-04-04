@@ -9,6 +9,10 @@
 * Specify `-f docker-compose.yaml` option in `docker-compose up` command to run service in production mode or just `docker-compose up` to run in dev mode.
 * Check api documentation at http://localhost:8000/api/openapi
 
+## Tests
+* Change working directory to *tests/functional*
+* Rename .env.sample to .env to customize container names
+* Run `docker-compose up`
 
 Ссылка для DeepBlue - https://github.com/maximium/Async_API_sprint_1
 

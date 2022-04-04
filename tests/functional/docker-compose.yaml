@@ -1,0 +1,39 @@
+version: '3.9'
+services:
+  elasticsearch:
+    image: elasticsearch:8.0.0
+    networks:
+      - async_api_test
+    environment:
+      cluster.routing.allocation.disk.threshold_enabled: false
+      xpack.security.enabled: false
+      discovery.type: single-node
+      ES_JAVA_OPTS: -Xms1000m -Xmx1000m
+
+  redis:
+    image: redis:6-alpine
+    networks:
+      - async_api_test
+
+  api:
+    build: ../../.
+    environment:
+      - GUNICORN_CMD_ARGS
+    networks:
+      - async_api_test
+    depends_on:
+      - redis
+      - elasticsearch
+
+  tests:
+    build: .
+    networks:
+      - async_api_test
+    entrypoint: >
+      sh -c "cd /app && python3 waiting.py  && python3 -m pytest src/"
+    depends_on:
+      - api
+
+networks:
+  async_api_test:
+    name: async_api_test_network
