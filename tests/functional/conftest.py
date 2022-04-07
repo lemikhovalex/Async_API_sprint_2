@@ -70,7 +70,7 @@ class HTTPResponse:
 
 @pytest_asyncio.fixture(scope="session")
 async def session():
-    session = aiohttp.ClientSession(headers={"Cache-Control": "no-cache, no-store"})
+    session = aiohttp.ClientSession(headers={"Cache-Control": "no-store"})
     yield session
     await session.close()
 
