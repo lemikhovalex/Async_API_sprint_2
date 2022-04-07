@@ -14,3 +14,7 @@ async def es_load(
         ],
     )
     await es_client.indices.refresh(index=index)
+
+
+def filter_uuid(data):
+    return set([i["uuid"] for i in data])
