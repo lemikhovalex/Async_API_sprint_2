@@ -30,3 +30,16 @@ async def test_genres_empty(es_client, make_get_request):
     response = await make_get_request("/genres")
     assert response.status == 200
     assert response.body == []
+
+
+@pytest.mark.asyncio
+async def test_genres_pagination(es_client, make_get_request):
+    await es_load(es_client, "genres", genres.genres)
+    response = await make_get_request("/genres", {"page[size]": 2, "page[number]": 1})
+    assert response.status == 200
+    assert isinstance(response.body, list)
+    assert len(response.body) == 2
+    response = await make_get_request("/genres", {"page[size]": 2, "page[number]": 2})
+    assert response.status == 200
+    assert isinstance(response.body, list)
+    assert len(response.body) == 1
