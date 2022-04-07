@@ -137,3 +137,13 @@ async def test_films_check_all_films(es_client, make_get_request):
     _MOVIES = sorted(_MOVIES, key=attrgetter("imdb_rating"), reverse=True)
     _MOVIES = [json.loads(f.json()) for f in _MOVIES]
     assert resp_all_films.body == _MOVIES
+
+
+@pytest.mark.asyncio
+async def test_films_check_no_films(es_client, make_get_request):
+    await es_load(es_client, "movies", [])
+    response = await make_get_request(
+        "/films/?sort=imdb_rating&page[size]=1000&page[number]=1",
+    )
+    assert response.status == 200
+    assert response.body == []
