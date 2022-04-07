@@ -2,7 +2,7 @@ from http import HTTPStatus
 from typing import List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi_cache.decorator import cache
 
 from api.v1 import GenrePartial, PartialFilmInfo, get_page_params
@@ -17,7 +17,9 @@ router = APIRouter()
 @router.get("/{genre_id}", response_model=GenrePartial)
 @cache(expire=REDIS_CACHE_EXPIRE)
 async def genre_details(
-    genre_id: UUID, genre_service: GenreService = Depends(get_genre_service)
+    request: Request,
+    genre_id: UUID,
+    genre_service: GenreService = Depends(get_genre_service),
 ) -> GenrePartial:
     genre = await genre_service.get_by_id(genre_id)
     if not genre:
@@ -28,6 +30,7 @@ async def genre_details(
 @router.get("", response_model=List[GenrePartial])
 @cache(expire=REDIS_CACHE_EXPIRE)
 async def genres(
+    request: Request,
     page: dict = Depends(get_page_params),
     genre_service: GenreService = Depends(get_genre_service),
 ) -> List[GenrePartial]:
@@ -41,6 +44,7 @@ async def genres(
 @router.get("/{genre_id}/films", response_model=List[PartialFilmInfo])
 @cache(expire=REDIS_CACHE_EXPIRE)
 async def genre_films(
+    request: Request,
     genre_id: str,
     page: dict = Depends(get_page_params),
     film_service: FilmService = Depends(get_film_service),

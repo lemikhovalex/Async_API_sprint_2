@@ -2,7 +2,7 @@ from http import HTTPStatus
 from typing import List, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi_cache.decorator import cache
 
 from api.v1 import FilmFullInfo, PartialFilmInfo, get_page_params
@@ -16,6 +16,7 @@ router = APIRouter()
 @router.get("/search", response_model=List[PartialFilmInfo])
 @cache(expire=REDIS_CACHE_EXPIRE)
 async def film_search(
+    request: Request,
     query: Optional[str] = None,
     page: dict = Depends(get_page_params),
     film_service: FilmService = Depends(get_film_service),
@@ -32,6 +33,7 @@ async def film_search(
 @router.get("", response_model=List[PartialFilmInfo])
 @cache(expire=REDIS_CACHE_EXPIRE)
 async def film_search_general(
+    request: Request,
     sort: Optional[str] = "imdb_rating",
     page: dict = Depends(get_page_params),
     film_service: FilmService = Depends(get_film_service),
@@ -48,7 +50,9 @@ async def film_search_general(
 @router.get("/{film_id}", response_model=FilmFullInfo)
 @cache(expire=REDIS_CACHE_EXPIRE)
 async def film_details(
-    film_id: UUID, film_service: FilmService = Depends(get_film_service)
+    request: Request,
+    film_id: UUID,
+    film_service: FilmService = Depends(get_film_service),
 ) -> FilmFullInfo:
     film = await film_service.get_by_id(film_id)
     if not film:

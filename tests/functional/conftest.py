@@ -1,15 +1,20 @@
 import asyncio
-import json
+import os
+import sys
+from dataclasses import dataclass
 from http import HTTPStatus
-from typing import AsyncGenerator, List
+from typing import AsyncGenerator, Optional
 
+import aiohttp
 import pytest
 import pytest_asyncio
 from elasticsearch import AsyncElasticsearch
-from elasticsearch.helpers import async_bulk
-from test_data import constants
+from multidict import CIMultiDictProxy
 
 from .settings import TestSettings
+from .test_data import constants
+
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 
 SETTINGS = TestSettings()
 
@@ -21,26 +26,17 @@ def event_loop():
     loop.close()
 
 
-@pytest_asyncio.fixture(scope="session")
-async def _es_connection() -> AsyncGenerator[AsyncElasticsearch, None]:
+@pytest_asyncio.fixture(scope="function")
+async def es_client() -> AsyncGenerator[AsyncElasticsearch, None]:
     """
     Создаёт файл и удаляет его, даже если сам тест упал в ошибку
     """
     url = f"http://{SETTINGS.es_host}:{SETTINGS.es_port}"
     es = AsyncElasticsearch(url)
-    yield es
-
-    await es.close()
-
-
-@pytest_asyncio.fixture(scope="session")
-async def filled_es(
-    _es_connection: AsyncElasticsearch,
-) -> AsyncGenerator[AsyncElasticsearch, None]:
     indecies = ["genres", "persons", "movies"]
     await asyncio.gather(
         *[
-            _es_connection.indices.create(
+            es.indices.create(
                 index=idx,
                 settings=constants.settings,
                 mappings=getattr(constants, f"mappings_{idx}"),
@@ -49,28 +45,46 @@ async def filled_es(
             for idx in indecies
         ]
     )
-    actions = []
-    for idx in indecies:
-        actions.extend(actions_for_es_bulk(idx))
 
-    await async_bulk(client=_es_connection, actions=actions)
+    yield es
 
     await asyncio.gather(
-        *[_es_connection.indices.refresh(index=idx) for idx in indecies]
+        *[
+            es.indices.delete(
+                index=idx,
+                ignore=[HTTPStatus.BAD_REQUEST, HTTPStatus.NOT_FOUND],
+            )
+            for idx in indecies
+        ]
     )
 
-    yield _es_connection
-
-    for idx in indecies:
-        await _es_connection.indices.delete(
-            index=idx,
-            ignore=[HTTPStatus.BAD_REQUEST, HTTPStatus.NOT_FOUND],
-        )
-    await _es_connection.close()
+    await es.close()
 
 
-def actions_for_es_bulk(index: str) -> List[dict]:
+@dataclass
+class HTTPResponse:
+    body: dict
+    headers: CIMultiDictProxy[str]
+    status: int
 
-    with open(f"test_data/{index}.json", "r") as f:
-        data = json.load(f)
-    return [{"_index": index, "_id": datum["id"], "_source": datum} for datum in data]
+
+@pytest_asyncio.fixture(scope="session")
+async def session():
+    session = aiohttp.ClientSession(headers={"Cache-Control": "no-store"})
+    yield session
+    await session.close()
+
+
+@pytest_asyncio.fixture
+def make_get_request(session):
+    async def inner(method: str, params: Optional[dict] = None) -> HTTPResponse:
+        params = params or {}
+        url = f"http://{SETTINGS.api_host}:{SETTINGS.api_port}/api/v1{method}"
+        async with session.get(url, params=params) as response:
+            return HTTPResponse(
+                body=await response.json(),
+                headers=response.headers,
+                status=response.status,
+            )
+
+    return inner
