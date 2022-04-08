@@ -98,7 +98,7 @@ async def test_film_by_id(es_client, make_get_request):
 async def test_films_pagination(es_client, make_get_request):
     await es_load(es_client, "movies", MOVIES)
     resp_all_films = await make_get_request(
-        "/films/?sort=imdb_rating&page[size]=6&page[number]=1"
+        "/films", params={"sort": "imdb_rating", "page[size]": 6, "page[number]": 1}
     )
     assert resp_all_films.status == 200
     all_ids = {film["uuid"] for film in resp_all_films.body}
