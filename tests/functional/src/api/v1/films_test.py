@@ -4,6 +4,7 @@ from operator import attrgetter
 
 import pytest
 from pydantic import BaseModel
+from test_data.movies import movies as MOVIES
 from utils import es_load
 
 
@@ -14,10 +15,6 @@ class PartialFilm(BaseModel):
 
     class Config:
         fields = {"uuid": "id"}
-
-
-with open("test_data/movies.json", "r") as f:
-    MOVIES = json.load(f)
 
 
 @pytest.mark.asyncio
