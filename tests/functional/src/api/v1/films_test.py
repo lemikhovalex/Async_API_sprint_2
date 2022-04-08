@@ -4,6 +4,7 @@ from operator import attrgetter
 
 import pytest
 from pydantic import BaseModel
+from test_data.movies import movies
 from utils import es_load
 
 
@@ -16,13 +17,9 @@ class PartialFilm(BaseModel):
         fields = {"uuid": "id"}
 
 
-with open("test_data/movies.json", "r") as f:
-    MOVIES = json.load(f)
-
-
 @pytest.mark.asyncio
 async def test_film_by_id(es_client, make_get_request):
-    await es_load(es_client, "movies", MOVIES)
+    await es_load(es_client, "movies", movies)
     response = await make_get_request("/films/1f6546ba-b298-11ec-90b3-00155db24537")
     assert response.status == 200
     assert response.body == {
@@ -96,7 +93,7 @@ async def test_film_by_id(es_client, make_get_request):
 
 @pytest.mark.asyncio
 async def test_films_pagination(es_client, make_get_request):
-    await es_load(es_client, "movies", MOVIES)
+    await es_load(es_client, "movies", movies)
     resp_all_films = await make_get_request(
         "/films", params={"sort": "imdb_rating", "page[size]": 6, "page[number]": 1}
     )
@@ -124,14 +121,14 @@ async def test_films_pagination(es_client, make_get_request):
 @pytest.mark.asyncio
 async def test_films_check_all_films(es_client, make_get_request):
 
-    await es_load(es_client, "movies", MOVIES)
+    await es_load(es_client, "movies", movies)
     resp_all_films = await make_get_request(
         "/films/?sort=imdb_rating&page[size]=1000&page[number]=1"
     )
     assert resp_all_films.status == 200
     assert isinstance(resp_all_films.body, list)
     assert len(resp_all_films.body) == 6
-    _MOVIES = copy.deepcopy(MOVIES)
+    _MOVIES = copy.deepcopy(movies)
     _MOVIES = [PartialFilm(**m) for m in _MOVIES]
     _MOVIES = sorted(_MOVIES, key=attrgetter("uuid"))
     _MOVIES = sorted(_MOVIES, key=attrgetter("imdb_rating"), reverse=True)
