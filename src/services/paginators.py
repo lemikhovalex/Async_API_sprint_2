@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from math import ceil
 from typing import Optional
 
@@ -6,7 +7,26 @@ from elasticsearch import AsyncElasticsearch
 from core.config import MAX_ES_SEARCH_FROM_SIZE
 
 
-class ESQueryPaginator:
+class BasePaginator(ABC):
+    @abstractmethod
+    def __init__(
+        self,
+        query: dict,
+        sort: list,
+        es: AsyncElasticsearch,
+        index: str,
+        page_number: int,
+        page_size: int,
+        **kwargs
+    ):
+        pass
+
+    @abstractmethod
+    async def paginate_query(self) -> dict:
+        pass
+
+
+class ESQueryPaginator(BasePaginator):
     def __init__(
         self,
         query: dict,
