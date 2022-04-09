@@ -44,17 +44,6 @@ async def test_persons_multitask_pagination(es_client, make_get_request):
 
 
 @pytest.mark.asyncio
-async def test_persons_partial_name(es_client, make_get_request):
-    await es_load(es_client, "persons", persons.persons)
-    response = await make_get_request(
-        "/persons/search",
-        params={"query": "Mult", "page[number]": 1, "page[size]": 8},
-    )
-    assert response.status == 200
-    assert response.body == []
-
-
-@pytest.mark.asyncio
 async def test_persons_not_existing_name(es_client, make_get_request):
     await es_load(es_client, "persons", persons.persons)
     response = await make_get_request(
@@ -144,17 +133,6 @@ async def test_films_with_genre_2_with_pagination(es_client, make_get_request):
             "imdb_rating": 9.7,
         },
     ]
-
-
-@pytest.mark.asyncio
-async def test_films_partial_name(es_client, make_get_request):
-    await es_load(es_client, "movies", movies.movies)
-    response = await make_get_request(
-        "/films/search",
-        params={"query": "H", "page[number]": 1, "page[size]": 8},
-    )
-    assert response.status == 200
-    assert response.body == []
 
 
 @pytest.mark.asyncio
