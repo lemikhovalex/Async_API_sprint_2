@@ -34,13 +34,13 @@ async def es_client() -> AsyncGenerator[AsyncElasticsearch, None]:
     url = f"http://{SETTINGS.es_host}:{SETTINGS.es_port}"
     es = AsyncElasticsearch(url)
     indecies = ["genres", "persons", "movies"]
+    es = es.options(ignore_status=HTTPStatus.BAD_REQUEST)
     await asyncio.gather(
         *[
             es.indices.create(
                 index=idx,
                 settings=constants.settings,
                 mappings=getattr(constants, f"mappings_{idx}"),
-                ignore=HTTPStatus.BAD_REQUEST,
             )
             for idx in indecies
         ]
@@ -48,11 +48,11 @@ async def es_client() -> AsyncGenerator[AsyncElasticsearch, None]:
 
     yield es
 
+    es = es.options(ignore_status=[HTTPStatus.BAD_REQUEST, HTTPStatus.NOT_FOUND])
     await asyncio.gather(
         *[
             es.indices.delete(
                 index=idx,
-                ignore=[HTTPStatus.BAD_REQUEST, HTTPStatus.NOT_FOUND],
             )
             for idx in indecies
         ]
