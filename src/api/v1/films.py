@@ -22,12 +22,13 @@ async def film_search(
     film_service: FilmService = Depends(get_film_service),
     filter_genre: Optional[UUID] = Query(None, alias="filter[genre]"),
 ) -> List[PartialFilmInfo]:
-    return await get_all_search(
-        film_service=film_service,
+    out = await film_service.get_by(
+        page_number=page["number"],
+        page_size=page["size"],
         query=query,
-        page=page,
-        filter_genre=filter_genre,
+        genre_id=filter_genre,
     )
+    return [PartialFilmInfo(**film.dict()) for film in out]
 
 
 @router.get("", response_model=List[PartialFilmInfo])
@@ -39,12 +40,13 @@ async def film_search_general(
     film_service: FilmService = Depends(get_film_service),
     filter_genre: Optional[UUID] = Query(None, alias="filter[genre]"),
 ) -> List[PartialFilmInfo]:
-    return await get_all_search(
-        film_service=film_service,
+    out = await film_service.get_by(
+        page_number=page["number"],
+        page_size=page["size"],
         sort=sort,
-        page=page,
-        filter_genre=filter_genre,
+        genre_id=filter_genre,
     )
+    return [PartialFilmInfo(**film.dict()) for film in out]
 
 
 @router.get("/{film_id}", response_model=FilmFullInfo)
@@ -57,28 +59,4 @@ async def film_details(
     film = await film_service.get_by_id(film_id)
     if not film:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=FILM_NOT_FOUND)
-    return FilmFullInfo.parse_obj(film.dict())
-
-
-async def get_all_search(
-    film_service,
-    page: dict,
-    sort: Optional[str] = None,
-    query: Optional[str] = None,
-    filter_genre: Optional[UUID] = Query(None, alias="filter[genre]"),
-) -> List[PartialFilmInfo]:
-    out = await film_service.get_by_query(
-        query=query,
-        page_number=page["number"],
-        page_size=page["size"],
-        sort_by=sort,
-        genre_filter=filter_genre,
-    )
-    return [
-        PartialFilmInfo(
-            uuid=es_film.uuid,
-            title=es_film.title,
-            imdb_rating=es_film.imdb_rating,
-        )
-        for es_film in out
-    ]
+    return FilmFullInfo(**film.dict())
