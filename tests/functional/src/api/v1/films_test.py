@@ -25,7 +25,7 @@ async def test_film_by_id(es_client, make_get_request):
     assert response.body == {
         "uuid": "1f6546ba-b298-11ec-90b3-00155db24537",
         "imdb_rating": 9.7,
-        "title": "HP",
+        "title": "HP 4",
         "description": "description for HP",
         "genres": [
             {"uuid": "1f64e56c-b298-11ec-90b3-00155db24537", "name": "comedy"},

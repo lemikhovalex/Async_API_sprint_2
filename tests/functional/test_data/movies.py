@@ -2,7 +2,7 @@ movies = [
     {
         "id": "1f650754-b298-11ec-90b3-00155db24537",
         "imdb_rating": 10.0,
-        "title": "HP",
+        "title": "HP 1",
         "description": "description for HP",
         "directors_names": [],
         "actors_names": [],
@@ -54,7 +54,7 @@ movies = [
     {
         "id": "1f651c76-b298-11ec-90b3-00155db24537",
         "imdb_rating": 9.9,
-        "title": "HP",
+        "title": "HP 2",
         "description": "description for HP",
         "directors_names": [],
         "actors_names": [],
@@ -106,7 +106,7 @@ movies = [
     {
         "id": "1f652f72-b298-11ec-90b3-00155db24537",
         "imdb_rating": 9.8,
-        "title": "HP",
+        "title": "HP 3",
         "description": "description for HP",
         "directors_names": [],
         "actors_names": [],
@@ -158,7 +158,7 @@ movies = [
     {
         "id": "1f6546ba-b298-11ec-90b3-00155db24537",
         "imdb_rating": 9.7,
-        "title": "HP",
+        "title": "HP 4",
         "description": "description for HP",
         "directors_names": [],
         "actors_names": [],
@@ -210,7 +210,7 @@ movies = [
     {
         "id": "1f656672-b298-11ec-90b3-00155db24537",
         "imdb_rating": 10.0,
-        "title": "SW",
+        "title": "SW 1",
         "description": "description for SW",
         "directors_names": [],
         "actors_names": [],
@@ -262,7 +262,7 @@ movies = [
     {
         "id": "1f657e5a-b298-11ec-90b3-00155db24537",
         "imdb_rating": 9.9,
-        "title": "SW",
+        "title": "SW 2",
         "description": "description for SW",
         "directors_names": [],
         "actors_names": [],
