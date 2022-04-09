@@ -80,13 +80,6 @@ class BaseESService(BaseTableService, ABC):
         return self._result_class().parse_obj(doc["_source"])
 
 
-class ESServieNamePartQueryMixin(ABC):
-    def _query_by_name_part(self, value: UUID, query: dict) -> dict:
-        # TODO look for escape function or take it from php es client
-        query["bool"]["must"].append({"match": {"name": {"query": value}}})
-        return query
-
-
 class BaseService(ABC):
     def __init__(self, elastic: AsyncElasticsearch):
         self.elastic = elastic

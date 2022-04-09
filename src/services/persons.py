@@ -1,21 +1,27 @@
 from functools import lru_cache
 from typing import Type
+from uuid import UUID
 
 from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
 
 from db.elastic import get_elastic
 from models.person import Person
-from services.base import BaseESService, ESServieNamePartQueryMixin
+from services.base import BaseESService
 from services.paginators import ESQueryPaginator
 
 
-class PersonService(BaseESService, ESServieNamePartQueryMixin):
+class PersonService(BaseESService):
     def source(self) -> str:
         return "persons"
 
     def _result_class(self) -> Type[Person]:
         return Person
+
+    def _query_by_name_part(self, value: UUID, query: dict) -> dict:
+        # TODO look for escape function or take it from php es client
+        query["bool"]["must"].append({"match": {"name": {"query": value}}})
+        return query
 
 
 @lru_cache()
