@@ -25,7 +25,7 @@ async def test_film_by_id(es_client, make_get_request):
     assert response.body == {
         "uuid": "1f6546ba-b298-11ec-90b3-00155db24537",
         "imdb_rating": 9.7,
-        "title": "HP",
+        "title": "HP 4",
         "description": "description for HP",
         "genres": [
             {"uuid": "1f64e56c-b298-11ec-90b3-00155db24537", "name": "comedy"},
@@ -123,7 +123,7 @@ async def test_films_check_all_films(es_client, make_get_request):
 
     await es_load(es_client, "movies", movies)
     resp_all_films = await make_get_request(
-        "/films/?sort=imdb_rating&page[size]=1000&page[number]=1"
+        "/films", params={"sort": "imdb_rating", "page[size]": 1000, "page[number]": 1}
     )
     assert resp_all_films.status == 200
     assert isinstance(resp_all_films.body, list)
