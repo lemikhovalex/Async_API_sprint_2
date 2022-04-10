@@ -19,7 +19,7 @@ class BaseService(ABC):
         self, page_number: int, page_size: int, sort: Optional[str] = None, **kwargs
     ):
 
-        _sort = _sort = [{"_score": {}}]
+        _sort = [{"_score": {}}]
         order = "desc"
         if sort is not None:
             if sort.startswith("-"):
