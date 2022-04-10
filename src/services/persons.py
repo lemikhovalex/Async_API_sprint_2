@@ -7,12 +7,12 @@ from fastapi import Depends
 
 from db.elastic import get_elastic
 from models.person import Person
-from services.base import BaseESService
+from services.base import BaseService
 from services.paginators import ESQueryPaginator
 
 
-class PersonService(BaseESService):
-    def source(self) -> str:
+class PersonService(BaseService):
+    def _index_name(self) -> str:
         return "persons"
 
     def _result_class(self) -> Type[Person]:

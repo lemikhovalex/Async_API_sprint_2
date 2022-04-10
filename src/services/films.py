@@ -7,12 +7,12 @@ from fastapi import Depends
 
 from db.elastic import get_elastic
 from models.film import Film
-from services.base import BaseESService
+from services.base import BaseService
 from services.paginators import ESQueryPaginator
 
 
-class FilmService(BaseESService):
-    def source(self) -> str:
+class FilmService(BaseService):
+    def _index_name(self) -> str:
         return "movies"
 
     def _result_class(self) -> Type[Film]:

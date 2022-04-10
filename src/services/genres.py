@@ -8,11 +8,11 @@ from db.elastic import get_elastic
 from models.genre import Genre
 from services.paginators import ESQueryPaginator
 
-from .base import BaseESService
+from .base import BaseService
 
 
-class GenreService(BaseESService):
-    def source(self) -> str:
+class GenreService(BaseService):
+    def _index_name(self) -> str:
         return "genres"
 
     def _result_class(self) -> Type[Genre]:
