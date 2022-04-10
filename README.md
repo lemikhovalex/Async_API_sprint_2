@@ -14,6 +14,6 @@
 * Rename .env.sample to .env to customize container names
 * Run `docker-compose up`
 
-Ссылка для DeepBlue - https://github.com/maximium/Async_API_sprint_1
+Ссылка для DeepBlue - https://github.com/maximium/Async_API_sprint_2
 
 Таски по ETL закрыты тут - https://github.com/maximium/etl-pges
