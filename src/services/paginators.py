@@ -15,14 +15,13 @@ class BasePaginator(ABC):
         sort: list,
         es: AsyncElasticsearch,
         index: str,
-        page_number: int,
         page_size: int,
         **kwargs
     ):
         pass
 
     @abstractmethod
-    async def paginate_query(self) -> dict:
+    async def get_page(self, page_number: int) -> dict:
         pass
 
 
@@ -33,7 +32,6 @@ class ESQueryPaginator(BasePaginator):
         sort: list,
         es: AsyncElasticsearch,
         index: str,
-        page_number: int,
         page_size: int,
         **kwargs
     ):
@@ -42,13 +40,14 @@ class ESQueryPaginator(BasePaginator):
         self.es = es
         self.index = index
         self.page_size = page_size
-        self.search_from = (page_number - 1) * page_size
         self.accum_shift = 0
         self.search_after = None
         self.pit = None
         self.search_add_args = kwargs
 
-    async def paginate_query(self) -> dict:
+    async def get_page(self, page_number: int) -> dict:
+        self.page_number = page_number
+        self.search_from = (self.page_number - 1) * self.page_size
         n = ceil(self.search_from / MAX_ES_SEARCH_FROM_SIZE)
         self.pit = await self.es.open_point_in_time(index=self.index, keep_alive="1m")
         self.pit = self.pit["id"]

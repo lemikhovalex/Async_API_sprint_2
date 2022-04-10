@@ -29,7 +29,8 @@ class BaseService(ABC):
         _query = {
             "bool": {"must": [], "should": []},
         }
-        _sort.append({"id": {}})
+        if "id" not in [list(s.keys())[0] for s in _sort]:
+            _sort.append({"id": {}})
         if len(kwargs) > 0:
             for method, value in kwargs.items():
                 method_name = "_query_by_{m}".format(m=method)
@@ -41,10 +42,9 @@ class BaseService(ABC):
             sort=_sort,
             es=self.elastic,
             index=self._index_name(),
-            page_number=page_number,
             page_size=page_size,
         )
-        resp = await paginator.paginate_query()
+        resp = await paginator.get_page(page_number=page_number)
         results_src = [datum["_source"] for datum in resp["hits"]["hits"]]
         return [self._result_class().parse_obj(src) for src in results_src]
 
