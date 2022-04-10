@@ -37,16 +37,16 @@ class BaseESService(BaseTableService, ABC):
         self.paginator = paginator
 
     async def get_by(
-        self, page_number: int, page_size: int, sort_by: Optional[str] = None, **kwargs
+        self, page_number: int, page_size: int, sort: Optional[str] = None, **kwargs
     ):
 
         _sort = _sort = [{"_score": {}}]
         order = "desc"
-        if sort_by is not None:
-            if sort_by.startswith("-"):
+        if sort is not None:
+            if sort.startswith("-"):
                 order = "asc"
-                sort_by = sort_by[1:]
-            _sort.insert(0, {sort_by: {"order": order}})
+                sort = sort[1:]
+            _sort.insert(0, {sort: {"order": order}})
         _query = {
             "bool": {"must": [], "should": []},
         }

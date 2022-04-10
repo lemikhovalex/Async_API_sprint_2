@@ -6,12 +6,13 @@ from fastapi import Depends
 
 from db.elastic import get_elastic
 from models.genre import Genre
+from services.paginators import ESQueryPaginator
 
-from .base import BaseService
+from .base import BaseESService
 
 
-class GenreService(BaseService):
-    def _index_name(self) -> str:
+class GenreService(BaseESService):
+    def source(self) -> str:
         return "genres"
 
     def _result_class(self) -> Type[Genre]:
@@ -22,4 +23,4 @@ class GenreService(BaseService):
 def get_genre_service(
     elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> GenreService:
-    return GenreService(elastic)
+    return GenreService(elastic=elastic, paginator=ESQueryPaginator)
