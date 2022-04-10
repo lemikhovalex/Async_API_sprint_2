@@ -1,54 +1,58 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional, Type
+from typing import Optional, Type
 from uuid import UUID
 
-from elasticsearch import AsyncElasticsearch, exceptions
-
+from db.base import BaseStorage, QueryParam, SortFieldOption, SortParam
 from models.base import BaseModel
+from services.paginators import BasePaginator
 
 CACHE_EXPIRE_IN_SECONDS = 1
 
 
 class BaseService(ABC):
-    def __init__(self, elastic: AsyncElasticsearch):
-        self.elastic = elastic
+    def __init__(self, storage: BaseStorage, paginator: Type[BasePaginator]):
+        self.storage = storage
+        self.paginator = paginator
 
     async def get_by(
         self, page_number: int, page_size: int, sort: Optional[str] = None, **kwargs
-    ) -> List[BaseModel]:
-        """Random query fields goes in kwargs"""
-        if len(kwargs):
-            method_name = "_query_by_{0}".format("_".join(sorted(kwargs.keys())))
-            query = getattr(self, method_name)(**kwargs)
-        else:
-            query = {"match_all": {}}
-        sort_for_es = None
-        if sort is not None:
-            sort_for_es = {
-                sort.lstrip("-"): {"order": "desc" if sort.startswith("-") else "asc"}
-            }
+    ):
 
-        result = await self.elastic.search(
+        _sort = SortParam(fields=[{"_score": SortFieldOption(order="desc")}])
+        order = "desc"
+        if sort is not None:
+            if sort.startswith("-"):
+                order = "asc"
+                sort = sort[1:]
+            _sort.fields.insert(0, {sort: SortFieldOption(order=order)})
+        _query = QueryParam()
+        if "id" not in [list(s.keys())[0] for s in _sort.fields]:
+            _sort.fields.append({"id": SortFieldOption(order="asc")})
+        for method, value in kwargs.items():
+            method_name = "_query_by_{m}".format(m=method)
+            _query = getattr(self, method_name)(value=value, query=_query)
+
+        paginator = self.paginator(
+            query=_query,
+            sort=_sort,
+            storage=self.storage,
             index=self._index_name(),
-            query=query,
-            from_=page_size * (page_number - 1),
-            size=page_size,
-            sort=sort_for_es,
+            page_size=page_size,
         )
-        return [
-            self._result_class().parse_obj(doc["_source"])
-            for doc in result["hits"]["hits"]
-        ]
+        resp = await paginator.get_page(page_number=page_number)
+        results_src = [datum["_source"] for datum in resp["hits"]["hits"]]
+        return [self._result_class().parse_obj(src) for src in results_src]
 
     async def get_by_id(self, entity_id: UUID) -> Optional[BaseModel]:
-        try:
-            doc = await self.elastic.get(
-                index=self._index_name(),
-                id=str(entity_id),
-            )
-        except exceptions.NotFoundError:
+
+        doc = await self.storage.get_by_id(
+            index=self._index_name(),
+            id=str(entity_id),
+        )
+        if doc is None:
             return None
-        return self._result_class().parse_obj(doc["_source"])
+        else:
+            return self._result_class().parse_obj(doc["_source"])
 
     @abstractmethod
     def _index_name(self) -> str:

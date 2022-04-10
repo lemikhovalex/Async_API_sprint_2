@@ -1,13 +1,14 @@
 from functools import lru_cache
 from typing import Type
+from uuid import UUID
 
-from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
 
+from db.base import BaseStorage, QueryParam
 from db.elastic import get_elastic
 from models.person import Person
-
-from .base import BaseService
+from services.base import BaseService
+from services.paginators import ESQueryPaginator
 
 
 class PersonService(BaseService):
@@ -17,13 +18,15 @@ class PersonService(BaseService):
     def _result_class(self) -> Type[Person]:
         return Person
 
-    def _query_by_name_part(self, name_part: str):
+    def _query_by_name_part(self, value: UUID, query: QueryParam) -> QueryParam:
         # TODO look for escape function or take it from php es client
-        return {"match": {"name": {"query": name_part}}}
+
+        query.bool_.must.append({"match": {"name": {"query": value}}})
+        return query
 
 
 @lru_cache()
 def get_person_service(
-    elastic: AsyncElasticsearch = Depends(get_elastic),
+    elastic: BaseStorage = Depends(get_elastic),
 ) -> PersonService:
-    return PersonService(elastic)
+    return PersonService(storage=elastic, paginator=ESQueryPaginator)
