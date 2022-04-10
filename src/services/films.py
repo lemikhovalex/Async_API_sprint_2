@@ -2,9 +2,9 @@ from functools import lru_cache
 from typing import Type
 from uuid import UUID
 
-from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
 
+from db.base import BaseStorage, QueryParam
 from db.elastic import get_elastic
 from models.film import Film
 from services.base import BaseService
@@ -18,10 +18,10 @@ class FilmService(BaseService):
     def _result_class(self) -> Type[Film]:
         return Film
 
-    def _query_by_genre_id(self, value: UUID, query: dict) -> dict:
+    def _query_by_genre_id(self, value: UUID, query: QueryParam) -> QueryParam:
         # TODO look for escape function or take it from php es client
         if value is not None:
-            query["bool"]["must"].append(
+            query.bool_.must.append(
                 {
                     "nested": {
                         "path": "genres",
@@ -32,9 +32,9 @@ class FilmService(BaseService):
 
         return query
 
-    def _query_by_query(self, value: UUID, query: dict) -> dict:
+    def _query_by_query(self, value: UUID, query: QueryParam) -> QueryParam:
         # TODO look for escape function or take it from php es client
-        query["bool"]["must"].append(
+        query.bool_.must.append(
             {
                 "multi_match": {
                     "query": value,
@@ -44,7 +44,7 @@ class FilmService(BaseService):
         )
         return query
 
-    def _query_by_person_id(self, value: UUID, query: dict) -> dict:
+    def _query_by_person_id(self, value: UUID, query: QueryParam) -> QueryParam:
         # TODO look for escape function or take from php es client
         def _q_nested(role, person_id):
             return {
@@ -54,12 +54,12 @@ class FilmService(BaseService):
         roles = ("actors", "directors", "writers")
 
         to_app = [_q_nested(role, value) for role in roles]
-        query["bool"]["should"].extend(to_app)
+        query.bool_.should.extend(to_app)
         return query
 
 
 @lru_cache()
 def get_film_service(
-    elastic: AsyncElasticsearch = Depends(get_elastic),
+    elastic: BaseStorage = Depends(get_elastic),
 ) -> FilmService:
-    return FilmService(elastic=elastic, paginator=ESQueryPaginator)
+    return FilmService(storage=elastic, paginator=ESQueryPaginator)

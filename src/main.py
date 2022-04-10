@@ -33,9 +33,10 @@ async def startup():
         redis.redis = await aioredis.from_url(
             f"redis://{config.REDIS_HOST}:{config.REDIS_PORT}"
         )
-        elastic.es = AsyncElasticsearch(
+        _es = AsyncElasticsearch(
             hosts=[f"http://{config.ELASTIC_HOST}:{config.ELASTIC_PORT}"]
         )
+        elastic.es = elastic.ESStorage(elastic=_es)
         FastAPICache.init(RedisBackend(redis.redis), prefix="fastapi-cache")
     except ConnectionRefusedError:
         pass

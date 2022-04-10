@@ -2,21 +2,19 @@ from abc import ABC, abstractmethod
 from math import ceil
 from typing import Optional
 
-from elasticsearch import AsyncElasticsearch
-
 from core.config import MAX_ES_SEARCH_FROM_SIZE
+from db.base import BaseStorage, QueryParam, SortParam
+from db.elastic import ESStorage
 
 
 class BasePaginator(ABC):
     @abstractmethod
-    def __init__(
+    async def __init__(
         self,
-        query: dict,
-        sort: list,
-        es: AsyncElasticsearch,
-        index: str,
-        page_size: int,
-        **kwargs
+        query: QueryParam,
+        sort: SortParam,
+        storage: BaseStorage,
+        **kwargs,
     ):
         pass
 
@@ -28,16 +26,16 @@ class BasePaginator(ABC):
 class ESQueryPaginator(BasePaginator):
     def __init__(
         self,
-        query: dict,
-        sort: list,
-        es: AsyncElasticsearch,
+        query: QueryParam,
+        sort: SortParam,
+        storage: ESStorage,
         index: str,
         page_size: int,
-        **kwargs
+        **kwargs,
     ):
         self.query = query
         self.sort = sort
-        self.es = es
+        self.storage = storage
         self.index = index
         self.page_size = page_size
         self.accum_shift = 0
@@ -49,14 +47,14 @@ class ESQueryPaginator(BasePaginator):
         self.page_number = page_number
         self.search_from = (self.page_number - 1) * self.page_size
         n = ceil(self.search_from / MAX_ES_SEARCH_FROM_SIZE)
-        self.pit = await self.es.open_point_in_time(index=self.index, keep_alive="1m")
+        self.pit = await self.storage.open_pit(index=self.index, keep_alive="1m")
         self.pit = self.pit["id"]
         # make shure that search after point to the beginning of page
         for _ in range(n):
             await self._process_inner_pag_query()
 
         out = await self._search_after()
-        await self.es.close_point_in_time(id=self.pit)
+        await self.storage.close_pit(id=self.pit)
         self.pit = None
         return out
 
@@ -71,21 +69,21 @@ class ESQueryPaginator(BasePaginator):
         self.search_after = resp["hits"]["hits"][-1]["sort"]
 
     async def _search_after(self, size: Optional[int] = None):
-        return await self.es.search(
+        return await self.storage.get_with_search(
             query=self.query,
             sort=self.sort,
             search_after=self.search_after,
             size=size or self.page_size,
-            pit={"id": self.pit, "keep_alive": "1m"},
-            **self.search_add_args
+            pit=self.pit,
+            **self.search_add_args,
         )
 
     async def _initial_query(self):
-        return await self.es.search(
+        return await self.storage.get_with_search(
             query=self.query,
             sort=self.sort,
             from_=0,
             size=min(self.search_from, MAX_ES_SEARCH_FROM_SIZE),
-            pit={"id": self.pit, "keep_alive": "1m"},
-            **self.search_add_args
+            pit=self.pit,
+            **self.search_add_args,
         )

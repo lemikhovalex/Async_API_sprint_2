@@ -1,9 +1,9 @@
 from functools import lru_cache
 from typing import Type
 
-from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
 
+from db.base import BaseStorage
 from db.elastic import get_elastic
 from models.genre import Genre
 from services.paginators import ESQueryPaginator
@@ -21,6 +21,6 @@ class GenreService(BaseService):
 
 @lru_cache()
 def get_genre_service(
-    elastic: AsyncElasticsearch = Depends(get_elastic),
+    elastic: BaseStorage = Depends(get_elastic),
 ) -> GenreService:
-    return GenreService(elastic=elastic, paginator=ESQueryPaginator)
+    return GenreService(storage=elastic, paginator=ESQueryPaginator)
