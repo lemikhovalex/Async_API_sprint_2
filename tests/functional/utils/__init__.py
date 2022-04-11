@@ -1,12 +1,10 @@
-from typing import List
-
 from elasticsearch import AsyncElasticsearch
 from elasticsearch.helpers import async_bulk
 
 
 async def es_load(
-    es_client: AsyncElasticsearch, index: str, data: List[dict]
-) -> List[dict]:
+    es_client: AsyncElasticsearch, index: str, data: list[dict]
+) -> list[dict]:
     await async_bulk(
         es_client,
         actions=[

@@ -1,5 +1,4 @@
 from http import HTTPStatus
-from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -27,13 +26,13 @@ async def genre_details(
     return GenrePartial(**genre.dict())
 
 
-@router.get("", response_model=List[GenrePartial])
+@router.get("", response_model=list[GenrePartial])
 @cache(expire=REDIS_CACHE_EXPIRE)
 async def genres(
     request: Request,
     page: dict = Depends(get_page_params),
     genre_service: GenreService = Depends(get_genre_service),
-) -> List[GenrePartial]:
+) -> list[GenrePartial]:
     genres = await genre_service.get_by(
         page_number=page["number"],
         page_size=page["size"],
@@ -41,14 +40,14 @@ async def genres(
     return [GenrePartial(**genre.dict()) for genre in genres]
 
 
-@router.get("/{genre_id}/films", response_model=List[PartialFilmInfo])
+@router.get("/{genre_id}/films", response_model=list[PartialFilmInfo])
 @cache(expire=REDIS_CACHE_EXPIRE)
 async def genre_films(
     request: Request,
     genre_id: str,
     page: dict = Depends(get_page_params),
     film_service: FilmService = Depends(get_film_service),
-) -> List[PartialFilmInfo]:
+) -> list[PartialFilmInfo]:
     films = await film_service.get_by(
         genre_id=genre_id,
         page_number=page["number"],

@@ -1,5 +1,4 @@
 from http import HTTPStatus
-from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -14,14 +13,14 @@ from services.persons import PersonService, get_person_service
 router = APIRouter()
 
 
-@router.get("/search", response_model=List[PersonPartial])
+@router.get("/search", response_model=list[PersonPartial])
 @cache(expire=REDIS_CACHE_EXPIRE)
 async def persons_search(
     request: Request,
     query: str,
     page: dict = Depends(get_page_params),
     person_service: PersonService = Depends(get_person_service),
-) -> List[PersonPartial]:
+) -> list[PersonPartial]:
     persons = await person_service.get_by(
         name_part=query,
         page_number=page["number"],
@@ -43,13 +42,13 @@ async def person_details(
     return PersonPartial(**person.dict())
 
 
-@router.get("", response_model=List[PersonPartial])
+@router.get("", response_model=list[PersonPartial])
 @cache(expire=REDIS_CACHE_EXPIRE)
 async def persons(
     request: Request,
     page: dict = Depends(get_page_params),
     person_service: PersonService = Depends(get_person_service),
-) -> List[PersonPartial]:
+) -> list[PersonPartial]:
     persons = await person_service.get_by(
         page_number=page["number"],
         page_size=page["size"],
@@ -57,14 +56,14 @@ async def persons(
     return [PersonPartial(**person.dict()) for person in persons]
 
 
-@router.get("/{person_id}/films", response_model=List[PartialFilmInfo])
+@router.get("/{person_id}/films", response_model=list[PartialFilmInfo])
 @cache(expire=REDIS_CACHE_EXPIRE)
 async def person_films(
     request: Request,
     person_id: str,
     page: dict = Depends(get_page_params),
     film_service: FilmService = Depends(get_film_service),
-) -> List[PartialFilmInfo]:
+) -> list[PartialFilmInfo]:
     films = await film_service.get_by(
         person_id=person_id,
         page_number=page["number"],

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Mapping
+from typing import Mapping
 
 from pydantic import BaseModel, Field
 
@@ -18,7 +18,7 @@ class SortFieldOption(BaseModel):
 
 
 class SortParam(BaseModel):
-    fields: List[Mapping[str, SortFieldOption]]
+    fields: list[Mapping[str, SortFieldOption]]
 
 
 class BaseStorage(ABC):
