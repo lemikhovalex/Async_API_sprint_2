@@ -28,18 +28,14 @@ async def startup():
     Подключиться можем при работающем event-loop
     Поэтому логика подключения происходит в асинхронной функции
     """
-    # todo real db must be added so no try
-    try:
-        redis.redis = await aioredis.from_url(
-            f"redis://{config.REDIS_HOST}:{config.REDIS_PORT}"
-        )
-        _es = AsyncElasticsearch(
-            hosts=[f"http://{config.ELASTIC_HOST}:{config.ELASTIC_PORT}"]
-        )
-        elastic.es = elastic.ESStorage(elastic=_es)
-        FastAPICache.init(RedisBackend(redis.redis), prefix="fastapi-cache")
-    except ConnectionRefusedError:
-        pass
+    redis.redis = await aioredis.from_url(
+        f"redis://{config.REDIS_HOST}:{config.REDIS_PORT}"
+    )
+    _es = AsyncElasticsearch(
+        hosts=[f"http://{config.ELASTIC_HOST}:{config.ELASTIC_PORT}"]
+    )
+    elastic.es = elastic.ESStorage(elastic=_es)
+    FastAPICache.init(RedisBackend(redis.redis), prefix="fastapi-cache")
 
 
 @app.on_event("shutdown")
