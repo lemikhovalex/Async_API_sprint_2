@@ -1,5 +1,3 @@
-from typing import List
-
 from .base import BaseModel
 
 
@@ -11,4 +9,4 @@ class BasePerson(BaseModel):
 
 
 class Person(BasePerson):
-    roles: List[str]
+    roles: list[str]

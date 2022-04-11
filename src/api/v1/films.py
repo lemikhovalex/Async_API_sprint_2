@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import List, Optional
+from typing import Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
@@ -13,7 +13,7 @@ from services.films import FilmService, get_film_service
 router = APIRouter()
 
 
-@router.get("/search", response_model=List[PartialFilmInfo])
+@router.get("/search", response_model=list[PartialFilmInfo])
 @cache(expire=REDIS_CACHE_EXPIRE)
 async def film_search(
     request: Request,
@@ -21,7 +21,7 @@ async def film_search(
     page: dict = Depends(get_page_params),
     film_service: FilmService = Depends(get_film_service),
     filter_genre: Optional[UUID] = Query(None, alias="filter[genre]"),
-) -> List[PartialFilmInfo]:
+) -> list[PartialFilmInfo]:
     out = await film_service.get_by(
         page_number=page["number"],
         page_size=page["size"],
@@ -31,7 +31,7 @@ async def film_search(
     return [PartialFilmInfo(**film.dict()) for film in out]
 
 
-@router.get("", response_model=List[PartialFilmInfo])
+@router.get("", response_model=list[PartialFilmInfo])
 @cache(expire=REDIS_CACHE_EXPIRE)
 async def film_search_general(
     request: Request,
@@ -39,7 +39,7 @@ async def film_search_general(
     page: dict = Depends(get_page_params),
     film_service: FilmService = Depends(get_film_service),
     filter_genre: Optional[UUID] = Query(None, alias="filter[genre]"),
-) -> List[PartialFilmInfo]:
+) -> list[PartialFilmInfo]:
     out = await film_service.get_by(
         page_number=page["number"],
         page_size=page["size"],

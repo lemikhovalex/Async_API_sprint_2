@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import List, Optional
+from typing import Optional
 from uuid import UUID
 
 from fastapi import Query
@@ -32,10 +32,10 @@ class PartialFilmInfo(BaseModel):
 
 class FilmFullInfo(PartialFilmInfo):
     description: Optional[str]
-    genre: List[GenrePartial]
-    actors: List[PersonPartial]
-    writers: List[PersonPartial]
-    directors: List[PersonPartial]
+    genre: list[GenrePartial]
+    actors: list[PersonPartial]
+    writers: list[PersonPartial]
+    directors: list[PersonPartial]
 
     class Config:
         fields = {"genre": "genres"}
