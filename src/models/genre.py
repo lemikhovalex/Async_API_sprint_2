@@ -1,9 +1,9 @@
 from .base import BaseModel
 
 
-class IDNameGenre(BaseModel):
+class BaseGenre(BaseModel):
     name: str
 
 
-class Genre(IDNameGenre):
+class Genre(BaseGenre):
     pass

@@ -1,15 +1,15 @@
 from typing import List, Optional
 
 from .base import BaseModel
-from .genre import IDNameGenre
-from .person import IDNamePerson
+from .genre import BaseGenre
+from .person import BasePerson
 
 
 class Film(BaseModel):
     imdb_rating: Optional[float]
-    genres: List[IDNameGenre]
+    genres: List[BaseGenre]
     title: str
     description: Optional[str]
-    actors: List[IDNamePerson]
-    writers: List[IDNamePerson]
-    directors: List[IDNamePerson]
+    actors: List[BasePerson]
+    writers: List[BasePerson]
+    directors: List[BasePerson]
