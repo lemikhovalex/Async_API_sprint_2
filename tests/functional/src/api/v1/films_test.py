@@ -20,7 +20,7 @@ class PartialFilm(BaseModel):
 @pytest.mark.asyncio
 async def test_film_by_id(es_client, make_get_request):
     await es_load(es_client, "movies", movies)
-    response = await make_get_request("/films/1f6546ba-b298-11ec-90b3-00155db24537")
+    response = await make_get_request("films/1f6546ba-b298-11ec-90b3-00155db24537")
     assert response.status == 200
     assert response.body == {
         "uuid": "1f6546ba-b298-11ec-90b3-00155db24537",
@@ -95,7 +95,7 @@ async def test_film_by_id(es_client, make_get_request):
 async def test_films_pagination(es_client, make_get_request):
     await es_load(es_client, "movies", movies)
     resp_all_films = await make_get_request(
-        "/films", params={"sort": "imdb_rating", "page[size]": 6, "page[number]": 1}
+        "films", params={"sort": "imdb_rating", "page[size]": 6, "page[number]": 1}
     )
     assert resp_all_films.status == 200
     all_ids = {film["uuid"] for film in resp_all_films.body}
@@ -104,7 +104,7 @@ async def test_films_pagination(es_client, make_get_request):
     n_parts = 2
     for _i in range(n_parts):
         resp = await make_get_request(
-            f"/films/?sort=imdb_rating&page[size]=3&page[number]={_i+1}"
+            f"films/?sort=imdb_rating&page[size]=3&page[number]={_i+1}"
         )
         assert resp.status == 200
         resps_films_by_parts.append([film["uuid"] for film in resp.body])
@@ -123,7 +123,7 @@ async def test_films_check_all_films(es_client, make_get_request):
 
     await es_load(es_client, "movies", movies)
     resp_all_films = await make_get_request(
-        "/films", params={"sort": "imdb_rating", "page[size]": 1000, "page[number]": 1}
+        "films", params={"sort": "imdb_rating", "page[size]": 1000, "page[number]": 1}
     )
     assert resp_all_films.status == 200
     assert isinstance(resp_all_films.body, list)
@@ -140,7 +140,7 @@ async def test_films_check_all_films(es_client, make_get_request):
 async def test_films_check_no_films(es_client, make_get_request):
     await es_load(es_client, "movies", [])
     response = await make_get_request(
-        "/films/?sort=imdb_rating&page[size]=1000&page[number]=1",
+        "films/?sort=imdb_rating&page[size]=1000&page[number]=1",
     )
     assert response.status == 200
     assert response.body == []

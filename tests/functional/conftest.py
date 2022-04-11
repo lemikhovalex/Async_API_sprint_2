@@ -79,7 +79,7 @@ async def session():
 def make_get_request(session):
     async def inner(method: str, params: Optional[dict] = None) -> HTTPResponse:
         params = params or {}
-        url = f"http://{SETTINGS.api_host}:{SETTINGS.api_port}/api/v1{method}"
+        url = f"http://{SETTINGS.api_host}:{SETTINGS.api_port}/api/v1/{method.lstrip('/')}"  # noqa: E501
         async with session.get(url, params=params) as response:
             return HTTPResponse(
                 body=await response.json(),
