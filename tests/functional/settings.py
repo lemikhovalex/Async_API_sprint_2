@@ -8,3 +8,5 @@ class TestSettings(BaseSettings):
     redis_port: int = Field(6379, env="REDIS_PORT")
     api_host: str = Field("api", env="API_HOST")
     api_port: int = Field(8000, env="API_PORT")
+    service_wait_timeout: int = Field(30, env="SERVICE_WAIT_TIMEOUT")  # seconds
+    service_wait_interval: int = Field(1, env="SERVICE_WAIT_INTERVAL")  # seconds
