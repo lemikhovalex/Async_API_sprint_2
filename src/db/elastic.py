@@ -1,8 +1,11 @@
+import logging
 from typing import Optional
 
 from elasticsearch import AsyncElasticsearch, exceptions
 
 from db.base import BaseStorage, QueryParam, SortParam
+
+logger = logging.getLogger(__name__)
 
 
 class ESStorage(BaseStorage):
@@ -28,8 +31,8 @@ class ESStorage(BaseStorage):
         from_: Optional[int] = None,
         pit: Optional[str] = None,
     ):
-        print("sort params: \n\n {s}\n\n".format(s=sort.dict(by_alias=True)))
-        print("query params: \n\n {s}\n\n".format(s=query.dict(by_alias=True)))
+        logger.debug("sort params: \n\n {s}\n\n".format(s=sort.dict(by_alias=True)))
+        logger.debug("query params: \n\n {s}\n\n".format(s=query.dict(by_alias=True)))
         return await self.es.search(
             query=query.dict(by_alias=True),
             sort=sort.dict(by_alias=True)["fields"],
