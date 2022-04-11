@@ -6,20 +6,20 @@ from utils import es_load, filter_uuid
 @pytest.mark.asyncio
 async def test_genre_by_id(es_client, make_get_request):
     await es_load(es_client, "genres", genres.genres)
-    response = await make_get_request("/genres/1f64e918-b298-11ec-90b3-00155db24537")
+    response = await make_get_request("genres/1f64e918-b298-11ec-90b3-00155db24537")
     assert response.status == 200
     assert response.body == {
         "uuid": "1f64e918-b298-11ec-90b3-00155db24537",
         "name": "action",
     }
-    response = await make_get_request("/genres/1f64e918-b298-11ec-90b3-00155db24539")
+    response = await make_get_request("genres/1f64e918-b298-11ec-90b3-00155db24539")
     assert response.status == 404
 
 
 @pytest.mark.asyncio
 async def test_genres(es_client, make_get_request):
     await es_load(es_client, "genres", genres.genres)
-    response = await make_get_request("/genres")
+    response = await make_get_request("genres")
     assert response.status == 200
     assert isinstance(response.body, list)
     assert len(response.body) == 3
@@ -27,7 +27,7 @@ async def test_genres(es_client, make_get_request):
 
 @pytest.mark.asyncio
 async def test_genres_empty(es_client, make_get_request):
-    response = await make_get_request("/genres")
+    response = await make_get_request("genres")
     assert response.status == 200
     assert response.body == []
 
@@ -35,11 +35,11 @@ async def test_genres_empty(es_client, make_get_request):
 @pytest.mark.asyncio
 async def test_genres_pagination(es_client, make_get_request):
     await es_load(es_client, "genres", genres.genres)
-    response = await make_get_request("/genres", {"page[size]": 2, "page[number]": 1})
+    response = await make_get_request("genres", {"page[size]": 2, "page[number]": 1})
     assert response.status == 200
     assert isinstance(response.body, list)
     assert len(response.body) == 2
-    response = await make_get_request("/genres", {"page[size]": 2, "page[number]": 2})
+    response = await make_get_request("genres", {"page[size]": 2, "page[number]": 2})
     assert response.status == 200
     assert isinstance(response.body, list)
     assert len(response.body) == 1
@@ -50,7 +50,7 @@ async def test_genre_films(es_client, make_get_request):
     await es_load(es_client, "genres", genres.genres)
     await es_load(es_client, "movies", movies.movies)
     response = await make_get_request(
-        "/genres/1f64e918-b298-11ec-90b3-00155db24537/films"
+        "genres/1f64e918-b298-11ec-90b3-00155db24537/films"
     )
     assert response.status == 200
     assert isinstance(response.body, list)
@@ -69,14 +69,14 @@ async def test_genre_films_pagination(es_client, make_get_request):
     await es_load(es_client, "genres", genres.genres)
     await es_load(es_client, "movies", movies.movies)
     response = await make_get_request(
-        "/genres/1f64e918-b298-11ec-90b3-00155db24537/films",
+        "genres/1f64e918-b298-11ec-90b3-00155db24537/films",
         {"page[size]": 2, "page[number]": 1},
     )
     assert response.status == 200
     assert isinstance(response.body, list)
     assert len(response.body) == 2
     response = await make_get_request(
-        "/genres/1f64e918-b298-11ec-90b3-00155db24537/films",
+        "genres/1f64e918-b298-11ec-90b3-00155db24537/films",
         {"page[size]": 2, "page[number]": 2},
     )
     assert response.status == 200
