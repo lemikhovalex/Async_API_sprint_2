@@ -23,7 +23,7 @@ class BaseService(ABC):
         if sort is not None:
             if sort.startswith("-"):
                 order = "asc"
-                sort = sort[1:]
+                sort = sort.removeprefix("-")
             _sort.fields.insert(0, {sort: SortFieldOption(order=order)})
         _query = QueryParam()
         if "id" not in [list(s.keys())[0] for s in _sort.fields]:
