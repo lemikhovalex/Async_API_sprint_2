@@ -18,14 +18,16 @@ class PartialFilm(BaseModel):
         fields = {"uuid": "id"}
 
 
-@pytest.mark.asyncio
+# All test coroutines will be treated as marked with this decorator.
+pytestmark = pytest.mark.asyncio
+
+
 async def test_film_by_id_absent(es_client, make_get_request):
     await es_load(es_client, "movies", movies)
     response = await make_get_request("films/1f6546ba-0000-11ec-90b3-00155db24537")
     assert response.status == HTTPStatus.NOT_FOUND
 
 
-@pytest.mark.asyncio
 async def test_film_by_id(es_client, make_get_request):
     await es_load(es_client, "movies", movies)
     response = await make_get_request("films/1f6546ba-b298-11ec-90b3-00155db24537")
@@ -99,7 +101,6 @@ async def test_film_by_id(es_client, make_get_request):
     }
 
 
-@pytest.mark.asyncio
 async def test_films_pagination(es_client, make_get_request):
     await es_load(es_client, "movies", movies)
     resp_all_films = await make_get_request(
@@ -126,7 +127,6 @@ async def test_films_pagination(es_client, make_get_request):
             bool(set(resps_films_by_parts[part]) & set(resps_films_by_parts[second_p]))
 
 
-@pytest.mark.asyncio
 async def test_films_check_all_films(es_client, make_get_request):
 
     await es_load(es_client, "movies", movies)
@@ -144,7 +144,6 @@ async def test_films_check_all_films(es_client, make_get_request):
     assert resp_all_films.body == _MOVIES
 
 
-@pytest.mark.asyncio
 async def test_films_check_no_films(es_client, make_get_request):
     await es_load(es_client, "movies", [])
     response = await make_get_request(

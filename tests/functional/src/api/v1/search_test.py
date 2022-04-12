@@ -4,8 +4,10 @@ import pytest
 from test_data import movies, persons
 from utils import es_load
 
+# All test coroutines will be treated as marked with this decorator.
+pytestmark = pytest.mark.asyncio
 
-@pytest.mark.asyncio
+
 async def test_persons_multitask(es_client, make_get_request):
     await es_load(es_client, "persons", persons.persons)
     response = await make_get_request(
@@ -29,7 +31,6 @@ async def test_persons_multitask(es_client, make_get_request):
     ]
 
 
-@pytest.mark.asyncio
 async def test_persons_multitask_pagination(es_client, make_get_request):
     await es_load(es_client, "persons", persons.persons)
     response = await make_get_request(
@@ -45,7 +46,6 @@ async def test_persons_multitask_pagination(es_client, make_get_request):
     ]
 
 
-@pytest.mark.asyncio
 async def test_persons_not_existing_name(es_client, make_get_request):
     await es_load(es_client, "persons", persons.persons)
     response = await make_get_request(
@@ -56,7 +56,6 @@ async def test_persons_not_existing_name(es_client, make_get_request):
     assert response.body == []
 
 
-@pytest.mark.asyncio
 async def test_films_with_genre_1(es_client, make_get_request):
     await es_load(es_client, "movies", movies.movies)
     response = await make_get_request(
@@ -83,7 +82,6 @@ async def test_films_with_genre_1(es_client, make_get_request):
     ]
 
 
-@pytest.mark.asyncio
 async def test_films_with_genre_2(es_client, make_get_request):
     await es_load(es_client, "movies", movies.movies)
     response = await make_get_request(
@@ -115,7 +113,6 @@ async def test_films_with_genre_2(es_client, make_get_request):
     ]
 
 
-@pytest.mark.asyncio
 async def test_films_with_genre_2_with_pagination(es_client, make_get_request):
     await es_load(es_client, "movies", movies.movies)
     response = await make_get_request(
@@ -137,7 +134,6 @@ async def test_films_with_genre_2_with_pagination(es_client, make_get_request):
     ]
 
 
-@pytest.mark.asyncio
 async def test_films_not_existing(es_client, make_get_request):
     await es_load(es_client, "movies", movies.movies)
     response = await make_get_request(
