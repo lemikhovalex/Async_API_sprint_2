@@ -4,6 +4,13 @@ from utils import es_load, filter_uuid
 
 
 @pytest.mark.asyncio
+async def test_person_by_id_absent(es_client, make_get_request):
+    await es_load(es_client, "persons", persons.persons)
+    response = await make_get_request("persons/1f64ea08-0000-11ec-90b3-00155db24537")
+    assert response.status == 404
+
+
+@pytest.mark.asyncio
 async def test_person_by_id(es_client, make_get_request):
     await es_load(es_client, "persons", persons.persons)
     response = await make_get_request("persons/1f64ea08-b298-11ec-90b3-00155db24537")
@@ -12,8 +19,6 @@ async def test_person_by_id(es_client, make_get_request):
         "uuid": "1f64ea08-b298-11ec-90b3-00155db24537",
         "full_name": "Multitask person 0",
     }
-    response = await make_get_request("persons/0004ea08-b298-11ec-90b3-00155db24537")
-    assert response.status == 404
 
 
 @pytest.mark.asyncio
