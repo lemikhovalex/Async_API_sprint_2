@@ -1,5 +1,6 @@
 import copy
 import json
+from http import HTTPStatus
 from operator import attrgetter
 
 import pytest
@@ -21,14 +22,14 @@ class PartialFilm(BaseModel):
 async def test_film_by_id_absent(es_client, make_get_request):
     await es_load(es_client, "movies", movies)
     response = await make_get_request("films/1f6546ba-0000-11ec-90b3-00155db24537")
-    assert response.status == 404
+    assert response.status == HTTPStatus.NOT_FOUND
 
 
 @pytest.mark.asyncio
 async def test_film_by_id(es_client, make_get_request):
     await es_load(es_client, "movies", movies)
     response = await make_get_request("films/1f6546ba-b298-11ec-90b3-00155db24537")
-    assert response.status == 200
+    assert response.status == HTTPStatus.OK
     assert response.body == {
         "uuid": "1f6546ba-b298-11ec-90b3-00155db24537",
         "imdb_rating": 9.7,
@@ -104,7 +105,7 @@ async def test_films_pagination(es_client, make_get_request):
     resp_all_films = await make_get_request(
         "films", params={"sort": "imdb_rating", "page[size]": 6, "page[number]": 1}
     )
-    assert resp_all_films.status == 200
+    assert resp_all_films.status == HTTPStatus.OK
     all_ids = {film["uuid"] for film in resp_all_films.body}
 
     resps_films_by_parts = []
@@ -113,7 +114,7 @@ async def test_films_pagination(es_client, make_get_request):
         resp = await make_get_request(
             f"films/?sort=imdb_rating&page[size]=3&page[number]={_i+1}"
         )
-        assert resp.status == 200
+        assert resp.status == HTTPStatus.OK
         resps_films_by_parts.append([film["uuid"] for film in resp.body])
 
     for part in range(n_parts):
@@ -132,7 +133,7 @@ async def test_films_check_all_films(es_client, make_get_request):
     resp_all_films = await make_get_request(
         "films", params={"sort": "imdb_rating", "page[size]": 1000, "page[number]": 1}
     )
-    assert resp_all_films.status == 200
+    assert resp_all_films.status == HTTPStatus.OK
     assert isinstance(resp_all_films.body, list)
     assert len(resp_all_films.body) == 6
     _MOVIES = copy.deepcopy(movies)
@@ -149,5 +150,5 @@ async def test_films_check_no_films(es_client, make_get_request):
     response = await make_get_request(
         "films/?sort=imdb_rating&page[size]=1000&page[number]=1",
     )
-    assert response.status == 200
+    assert response.status == HTTPStatus.OK
     assert response.body == []
