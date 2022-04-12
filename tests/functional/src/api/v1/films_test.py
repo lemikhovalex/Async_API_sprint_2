@@ -109,22 +109,23 @@ async def test_films_pagination(es_client, make_get_request):
     assert resp_all_films.status == HTTPStatus.OK
     all_ids = {film["uuid"] for film in resp_all_films.body}
 
-    resps_films_by_parts = []
-    n_parts = 2
-    for _i in range(n_parts):
-        resp = await make_get_request(
-            f"films/?sort=imdb_rating&page[size]=3&page[number]={_i+1}"
-        )
-        assert resp.status == HTTPStatus.OK
-        resps_films_by_parts.append([film["uuid"] for film in resp.body])
+    first_page_resp = await make_get_request(
+        "films/?sort=imdb_rating&page[size]=3&page[number]=1"
+    )
+    assert first_page_resp.status == HTTPStatus.OK
 
-    for part in range(n_parts):
-        for r in resps_films_by_parts[part]:
-            assert r in all_ids
+    first_page = {film["uuid"] for film in first_page_resp.body}
+    assert first_page.issubset(all_ids)
 
-    for part in range(n_parts):
-        for second_p in range(part, n_parts):
-            bool(set(resps_films_by_parts[part]) & set(resps_films_by_parts[second_p]))
+    second_page_resp = await make_get_request(
+        "films/?sort=imdb_rating&page[size]=3&page[number]=2"
+    )
+    assert second_page_resp.status == HTTPStatus.OK
+
+    second_page = {film["uuid"] for film in second_page_resp.body}
+    assert second_page.issubset(all_ids)
+
+    assert len(second_page.intersection(first_page)) == 0
 
 
 async def test_films_check_all_films(es_client, make_get_request):
