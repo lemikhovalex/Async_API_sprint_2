@@ -18,6 +18,13 @@ class PartialFilm(BaseModel):
 
 
 @pytest.mark.asyncio
+async def test_film_by_id_absent(es_client, make_get_request):
+    await es_load(es_client, "movies", movies)
+    response = await make_get_request("films/1f6546ba-0000-11ec-90b3-00155db24537")
+    assert response.status == 404
+
+
+@pytest.mark.asyncio
 async def test_film_by_id(es_client, make_get_request):
     await es_load(es_client, "movies", movies)
     response = await make_get_request("films/1f6546ba-b298-11ec-90b3-00155db24537")
