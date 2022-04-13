@@ -43,11 +43,8 @@ async def shutdown():
     """
     Отключаемся от баз при выключении сервера
     """
-    # todo real databases with no if
-    if redis.redis is not None:
-        await redis.redis.close()
-    if elastic.es is not None:
-        await elastic.es.close()
+    await redis.redis.close()
+    await elastic.es.close()
 
 
 app.include_router(films.router, prefix="/api/v1/films", tags=["film"])
