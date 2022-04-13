@@ -2,12 +2,12 @@ from http import HTTPStatus
 
 import pytest
 from test_data import movies, persons
-from utils import es_load
+from utils import es_load, filter_int
 
 # All test coroutines will be treated as marked with this decorator.
 pytestmark = pytest.mark.asyncio
 
-TEST_SEARCH_FILMS_PAFINATION_DATA = [
+TEST_SEARCH_FILMS_PAGINATION_DATA = [
     (
         1,
         2,
@@ -153,18 +153,13 @@ async def test_films_with_genre_2(es_client, make_get_request):
     ]
 
 
-def search_pagination_test_id_gen(x):
-    if isinstance(x, int):
-        return x
-
-
 @pytest.mark.parametrize(
-    "page_num,page_size,resp",
-    TEST_SEARCH_FILMS_PAFINATION_DATA,
-    ids=search_pagination_test_id_gen,
+    "page_num,page_size,expected_resp",
+    TEST_SEARCH_FILMS_PAGINATION_DATA,
+    ids=filter_int,
 )
 async def test_films_with_genre_2_with_pagination(
-    page_num, page_size, resp, es_client, make_get_request
+    page_num, page_size, expected_resp, es_client, make_get_request
 ):
     await es_load(es_client, "movies", movies.movies)
 
@@ -179,7 +174,7 @@ async def test_films_with_genre_2_with_pagination(
     )
 
     assert response.status == HTTPStatus.OK
-    assert response.body == resp
+    assert response.body == expected_resp
 
 
 async def test_films_not_existing(es_client, make_get_request):

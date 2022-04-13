@@ -16,3 +16,8 @@ async def es_load(
 
 def filter_uuid(data):
     return set([i["uuid"] for i in data])
+
+
+def filter_int(x):
+    if isinstance(x, int):
+        return x
