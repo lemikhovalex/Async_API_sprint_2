@@ -1,9 +1,7 @@
-from typing import Optional
-
 from aioredis import Redis
 
-redis: Optional[Redis] = None
+redis: Redis
 
 
 async def get_redis() -> Redis:
-    return redis
+    return redis  # noqa: F821

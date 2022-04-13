@@ -52,8 +52,8 @@ class ESStorage(BaseStorage):
         return await self.es.close()
 
 
-es: Optional[AsyncElasticsearch] = None
+es: AsyncElasticsearch
 
 
 async def get_elastic() -> ESStorage:
-    return es
+    return es  # noqa: F821
