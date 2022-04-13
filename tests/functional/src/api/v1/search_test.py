@@ -2,7 +2,7 @@ from http import HTTPStatus
 
 import pytest
 from test_data import movies, persons
-from utils import es_load
+from utils import es_load, take_only_ints
 
 # All test coroutines will be treated as marked with this decorator.
 pytestmark = pytest.mark.asyncio
@@ -153,15 +153,10 @@ async def test_films_with_genre_2(es_client, make_get_request):
     ]
 
 
-def search_pagination_test_id_gen(x):
-    if isinstance(x, int):
-        return x
-
-
 @pytest.mark.parametrize(
     "page_num,page_size,resp",
     TEST_SEARCH_FILMS_PAFINATION_DATA,
-    ids=search_pagination_test_id_gen,
+    ids=take_only_ints,
 )
 async def test_films_with_genre_2_with_pagination(
     page_num, page_size, resp, es_client, make_get_request
