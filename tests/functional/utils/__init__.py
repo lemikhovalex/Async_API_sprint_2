@@ -18,6 +18,6 @@ def filter_uuid(data):
     return set([i["uuid"] for i in data])
 
 
-def take_only_ints(x):
+def filter_int(x):
     if isinstance(x, int):
         return x

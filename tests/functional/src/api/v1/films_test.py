@@ -6,7 +6,7 @@ from operator import attrgetter
 import pytest
 from pydantic import BaseModel
 from test_data.movies import movies
-from utils import es_load, take_only_ints
+from utils import es_load, filter_int
 
 
 class PartialFilm(BaseModel):
@@ -22,7 +22,7 @@ class PartialFilm(BaseModel):
 pytestmark = pytest.mark.asyncio
 
 
-TEST_FILMS_PAFINATION_DATA = [
+TEST_FILMS_PAGINATION_DATA = [
     (
         1,
         3,
@@ -152,7 +152,7 @@ async def test_film_by_id(es_client, make_get_request):
 
 
 @pytest.mark.parametrize(
-    "page_num,page_size,resp", TEST_FILMS_PAFINATION_DATA, ids=take_only_ints
+    "page_num,page_size,resp", TEST_FILMS_PAGINATION_DATA, ids=filter_int
 )
 async def test_films_pagination(page_num, page_size, resp, es_client, make_get_request):
     await es_load(es_client, "movies", movies)

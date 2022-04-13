@@ -2,7 +2,7 @@ from http import HTTPStatus
 
 import pytest
 from test_data import movies, persons
-from utils import es_load, filter_uuid, take_only_ints
+from utils import es_load, filter_int, filter_uuid
 
 # All test coroutines will be treated as marked with this decorator.
 pytestmark = pytest.mark.asyncio
@@ -76,7 +76,7 @@ async def test_persons_films(es_client, make_get_request):
         (2, 3, 3),
         (3, 3, 0),
     ],
-    ids=take_only_ints,
+    ids=filter_int,
 )
 async def test_persons_films_pagination(
     page_num, page_size, resp_len, es_client, make_get_request
@@ -99,7 +99,7 @@ async def test_persons_films_pagination(
         (1, 20, 20),
         (2, 20, 1),
     ],
-    ids=take_only_ints,
+    ids=filter_int,
 )
 async def test_persons_pagination(
     page_num, page_size, resp_len, es_client, make_get_request
