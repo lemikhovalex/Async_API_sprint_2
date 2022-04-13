@@ -24,13 +24,17 @@ pytestmark = pytest.mark.asyncio
 
 async def test_film_by_id_absent(es_client, make_get_request):
     await es_load(es_client, "movies", movies)
+
     response = await make_get_request("films/1f6546ba-0000-11ec-90b3-00155db24537")
+
     assert response.status == HTTPStatus.NOT_FOUND
 
 
 async def test_film_by_id(es_client, make_get_request):
     await es_load(es_client, "movies", movies)
+
     response = await make_get_request("films/1f6546ba-b298-11ec-90b3-00155db24537")
+
     assert response.status == HTTPStatus.OK
     assert response.body == {
         "uuid": "1f6546ba-b298-11ec-90b3-00155db24537",
@@ -129,26 +133,29 @@ async def test_films_pagination(es_client, make_get_request):
 
 
 async def test_films_check_all_films(es_client, make_get_request):
-
     await es_load(es_client, "movies", movies)
-    resp_all_films = await make_get_request(
-        "films", params={"sort": "imdb_rating", "page[size]": 1000, "page[number]": 1}
-    )
-    assert resp_all_films.status == HTTPStatus.OK
-    assert isinstance(resp_all_films.body, list)
-    assert len(resp_all_films.body) == 6
     _MOVIES = copy.deepcopy(movies)
     _MOVIES = [PartialFilm(**m) for m in _MOVIES]
     _MOVIES = sorted(_MOVIES, key=attrgetter("uuid"))
     _MOVIES = sorted(_MOVIES, key=attrgetter("imdb_rating"), reverse=True)
     _MOVIES = [json.loads(f.json()) for f in _MOVIES]
+
+    resp_all_films = await make_get_request(
+        "films", params={"sort": "imdb_rating", "page[size]": 1000, "page[number]": 1}
+    )
+
+    assert resp_all_films.status == HTTPStatus.OK
+    assert isinstance(resp_all_films.body, list)
+    assert len(resp_all_films.body) == 6
     assert resp_all_films.body == _MOVIES
 
 
 async def test_films_check_no_films(es_client, make_get_request):
     await es_load(es_client, "movies", [])
+
     response = await make_get_request(
         "films/?sort=imdb_rating&page[size]=1000&page[number]=1",
     )
+
     assert response.status == HTTPStatus.OK
     assert response.body == []
