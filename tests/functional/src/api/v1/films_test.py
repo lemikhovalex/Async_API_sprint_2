@@ -152,9 +152,11 @@ async def test_film_by_id(es_client, make_get_request):
 
 
 @pytest.mark.parametrize(
-    "page_num,page_size,resp", TEST_FILMS_PAGINATION_DATA, ids=filter_int
+    "page_num,page_size,expected_resp", TEST_FILMS_PAGINATION_DATA, ids=filter_int
 )
-async def test_films_pagination(page_num, page_size, resp, es_client, make_get_request):
+async def test_films_pagination(
+    page_num, page_size, expected_resp, es_client, make_get_request
+):
     await es_load(es_client, "movies", movies)
 
     films_resp = await make_get_request(
@@ -167,7 +169,7 @@ async def test_films_pagination(page_num, page_size, resp, es_client, make_get_r
     )
 
     assert films_resp.status == HTTPStatus.OK
-    assert films_resp.body == resp
+    assert films_resp.body == expected_resp
 
 
 async def test_films_check_all_films(es_client, make_get_request):

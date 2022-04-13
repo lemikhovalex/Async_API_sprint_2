@@ -120,12 +120,12 @@ async def test_genre_films(es_client, make_get_request):
 
 
 @pytest.mark.parametrize(
-    "page_num,page_size,resp",
+    "page_num,page_size,expected_resp",
     TEST_GENRES_PAGINATION_DATA,
     ids=filter_int,
 )
 async def test_genres_pagination(
-    page_num, page_size, resp, es_client, make_get_request
+    page_num, page_size, expected_resp, es_client, make_get_request
 ):
     await es_load(es_client, "genres", genres.genres)
 
@@ -134,16 +134,16 @@ async def test_genres_pagination(
     )
 
     assert response.status == HTTPStatus.OK
-    assert response.body == resp
+    assert response.body == expected_resp
 
 
 @pytest.mark.parametrize(
-    "page_num,page_size,resp",
+    "page_num,page_size,expected_resp",
     TEST_FILMS_BY_GENRES_PAGINATION_DATA,
     ids=filter_int,
 )
 async def test_genre_films_pagination(
-    page_num, page_size, resp, es_client, make_get_request
+    page_num, page_size, expected_resp, es_client, make_get_request
 ):
     await es_load(es_client, "genres", genres.genres)
     await es_load(es_client, "movies", movies.movies)
@@ -154,4 +154,4 @@ async def test_genre_films_pagination(
     )
 
     assert response.status == HTTPStatus.OK
-    assert response.body == resp
+    assert response.body == expected_resp
