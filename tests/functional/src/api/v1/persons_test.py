@@ -39,16 +39,14 @@ async def test_persons_films(make_get_request):
     assert response.status == HTTPStatus.OK
     assert isinstance(response.body, list)
     assert len(response.body) == 6
-    assert filter_uuid(response.body) == set(
-        [
-            "1f650754-b298-11ec-90b3-00155db24537",
-            "1f651c76-b298-11ec-90b3-00155db24537",
-            "1f652f72-b298-11ec-90b3-00155db24537",
-            "1f6546ba-b298-11ec-90b3-00155db24537",
-            "1f656672-b298-11ec-90b3-00155db24537",
-            "1f657e5a-b298-11ec-90b3-00155db24537",
-        ]
-    )
+    assert filter_uuid(response.body) == {
+        "1f650754-b298-11ec-90b3-00155db24537",
+        "1f651c76-b298-11ec-90b3-00155db24537",
+        "1f652f72-b298-11ec-90b3-00155db24537",
+        "1f6546ba-b298-11ec-90b3-00155db24537",
+        "1f656672-b298-11ec-90b3-00155db24537",
+        "1f657e5a-b298-11ec-90b3-00155db24537",
+    }
 
 
 @pytest.mark.parametrize(

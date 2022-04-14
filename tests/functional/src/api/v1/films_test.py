@@ -6,7 +6,7 @@ from operator import attrgetter
 import pytest
 from pydantic import BaseModel
 from test_data.movies import movies
-from utils import filter_int
+from utils import filter_int, filter_uuid
 
 
 class PartialFilm(BaseModel):
@@ -26,44 +26,20 @@ TEST_FILMS_PAGINATION_DATA = [
     (
         1,
         3,
-        [
-            {
-                "uuid": "1f650754-b298-11ec-90b3-00155db24537",
-                "title": "HP 1",
-                "imdb_rating": 10.0,
-            },
-            {
-                "uuid": "1f656672-b298-11ec-90b3-00155db24537",
-                "title": "SW 1",
-                "imdb_rating": 10.0,
-            },
-            {
-                "uuid": "1f651c76-b298-11ec-90b3-00155db24537",
-                "title": "HP 2",
-                "imdb_rating": 9.9,
-            },
-        ],
+        {
+            "1f650754-b298-11ec-90b3-00155db24537",
+            "1f656672-b298-11ec-90b3-00155db24537",
+            "1f651c76-b298-11ec-90b3-00155db24537",
+        },
     ),
     (
         2,
         3,
-        [
-            {
-                "uuid": "1f657e5a-b298-11ec-90b3-00155db24537",
-                "title": "SW 2",
-                "imdb_rating": 9.9,
-            },
-            {
-                "uuid": "1f652f72-b298-11ec-90b3-00155db24537",
-                "title": "HP 3",
-                "imdb_rating": 9.8,
-            },
-            {
-                "uuid": "1f6546ba-b298-11ec-90b3-00155db24537",
-                "title": "HP 4",
-                "imdb_rating": 9.7,
-            },
-        ],
+        {
+            "1f657e5a-b298-11ec-90b3-00155db24537",
+            "1f652f72-b298-11ec-90b3-00155db24537",
+            "1f6546ba-b298-11ec-90b3-00155db24537",
+        },
     ),
 ]
 
@@ -161,7 +137,7 @@ async def test_films_pagination(page_num, page_size, expected_resp, make_get_req
     )
 
     assert films_resp.status == HTTPStatus.OK
-    assert films_resp.body == expected_resp
+    assert filter_uuid(films_resp.body) == expected_resp
 
 
 async def test_films_check_all_films(make_get_request):

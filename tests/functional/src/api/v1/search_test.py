@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
 import pytest
-from utils import filter_int
+from utils import filter_int, filter_uuid
 
 # All test coroutines will be treated as marked with this decorator.
 pytestmark = pytest.mark.asyncio
@@ -10,29 +10,15 @@ TEST_SEARCH_FILMS_PAGINATION_DATA = [
     (
         1,
         2,
-        [
-            {
-                "uuid": "1f650754-b298-11ec-90b3-00155db24537",
-                "title": "HP 1",
-                "imdb_rating": 10.0,
-            },
-            {
-                "uuid": "1f652f72-b298-11ec-90b3-00155db24537",
-                "title": "HP 3",
-                "imdb_rating": 9.8,
-            },
-        ],
+        {
+            "1f650754-b298-11ec-90b3-00155db24537",
+            "1f652f72-b298-11ec-90b3-00155db24537",
+        },
     ),
     (
         2,
         2,
-        [
-            {
-                "uuid": "1f6546ba-b298-11ec-90b3-00155db24537",
-                "title": "HP 4",
-                "imdb_rating": 9.7,
-            }
-        ],
+        {"1f6546ba-b298-11ec-90b3-00155db24537"},
     ),
 ]
 
@@ -44,20 +30,11 @@ async def test_persons_multitask(make_get_request):
     )
 
     assert response.status == HTTPStatus.OK
-    assert response.body == [
-        {
-            "uuid": "1f64ea08-b298-11ec-90b3-00155db24537",
-            "full_name": "Multitask person 0",
-        },
-        {
-            "uuid": "1f64ed64-b298-11ec-90b3-00155db24537",
-            "full_name": "Multitask person 1",
-        },
-        {
-            "uuid": "1f64eecc-b298-11ec-90b3-00155db24537",
-            "full_name": "Multitask person 2",
-        },
-    ]
+    assert filter_uuid(response.body) == {
+        "1f64ea08-b298-11ec-90b3-00155db24537",
+        "1f64ed64-b298-11ec-90b3-00155db24537",
+        "1f64eecc-b298-11ec-90b3-00155db24537",
+    }
 
 
 async def test_persons_multitask_pagination(make_get_request):
@@ -67,12 +44,9 @@ async def test_persons_multitask_pagination(make_get_request):
     )
 
     assert response.status == HTTPStatus.OK
-    assert response.body == [
-        {
-            "uuid": "1f64eecc-b298-11ec-90b3-00155db24537",
-            "full_name": "Multitask person 2",
-        },
-    ]
+    assert filter_uuid(response.body) == {
+        "1f64eecc-b298-11ec-90b3-00155db24537",
+    }
 
 
 async def test_persons_not_existing_name(make_get_request):
@@ -97,18 +71,10 @@ async def test_films_with_genre_1(make_get_request):
     )
 
     assert response.status == HTTPStatus.OK
-    assert response.body == [
-        {
-            "uuid": "1f651c76-b298-11ec-90b3-00155db24537",
-            "title": "HP 2",
-            "imdb_rating": 9.9,
-        },
-        {
-            "uuid": "1f652f72-b298-11ec-90b3-00155db24537",
-            "title": "HP 3",
-            "imdb_rating": 9.8,
-        },
-    ]
+    assert filter_uuid(response.body) == {
+        "1f651c76-b298-11ec-90b3-00155db24537",
+        "1f652f72-b298-11ec-90b3-00155db24537",
+    }
 
 
 async def test_films_with_genre_2(make_get_request):
@@ -123,23 +89,11 @@ async def test_films_with_genre_2(make_get_request):
     )
 
     assert response.status == HTTPStatus.OK
-    assert response.body == [
-        {
-            "uuid": "1f650754-b298-11ec-90b3-00155db24537",
-            "title": "HP 1",
-            "imdb_rating": 10.0,
-        },
-        {
-            "uuid": "1f652f72-b298-11ec-90b3-00155db24537",
-            "title": "HP 3",
-            "imdb_rating": 9.8,
-        },
-        {
-            "uuid": "1f6546ba-b298-11ec-90b3-00155db24537",
-            "title": "HP 4",
-            "imdb_rating": 9.7,
-        },
-    ]
+    assert filter_uuid(response.body) == {
+        "1f650754-b298-11ec-90b3-00155db24537",
+        "1f652f72-b298-11ec-90b3-00155db24537",
+        "1f6546ba-b298-11ec-90b3-00155db24537",
+    }
 
 
 @pytest.mark.parametrize(
@@ -161,7 +115,7 @@ async def test_films_with_genre_2_with_pagination(
     )
 
     assert response.status == HTTPStatus.OK
-    assert response.body == expected_resp
+    assert filter_uuid(response.body) == expected_resp
 
 
 async def test_films_not_existing(make_get_request):
