@@ -6,7 +6,7 @@ from operator import attrgetter
 import pytest
 from pydantic import BaseModel
 from test_data.movies import movies
-from utils import es_load, filter_int
+from utils import filter_int
 
 
 class PartialFilm(BaseModel):
@@ -68,17 +68,13 @@ TEST_FILMS_PAGINATION_DATA = [
 ]
 
 
-async def test_film_by_id_absent(es_client, make_get_request):
-    await es_load(es_client, "movies", movies)
-
+async def test_film_by_id_absent(make_get_request):
     response = await make_get_request("films/1f6546ba-0000-11ec-90b3-00155db24537")
 
     assert response.status == HTTPStatus.NOT_FOUND
 
 
-async def test_film_by_id(es_client, make_get_request):
-    await es_load(es_client, "movies", movies)
-
+async def test_film_by_id(make_get_request):
     response = await make_get_request("films/1f6546ba-b298-11ec-90b3-00155db24537")
 
     assert response.status == HTTPStatus.OK
@@ -154,11 +150,7 @@ async def test_film_by_id(es_client, make_get_request):
 @pytest.mark.parametrize(
     "page_num,page_size,expected_resp", TEST_FILMS_PAGINATION_DATA, ids=filter_int
 )
-async def test_films_pagination(
-    page_num, page_size, expected_resp, es_client, make_get_request
-):
-    await es_load(es_client, "movies", movies)
-
+async def test_films_pagination(page_num, page_size, expected_resp, make_get_request):
     films_resp = await make_get_request(
         "films",
         params={
@@ -172,8 +164,7 @@ async def test_films_pagination(
     assert films_resp.body == expected_resp
 
 
-async def test_films_check_all_films(es_client, make_get_request):
-    await es_load(es_client, "movies", movies)
+async def test_films_check_all_films(make_get_request):
     _MOVIES = copy.deepcopy(movies)
     _MOVIES = [PartialFilm(**m) for m in _MOVIES]
     _MOVIES = sorted(_MOVIES, key=attrgetter("uuid"))
@@ -188,14 +179,3 @@ async def test_films_check_all_films(es_client, make_get_request):
     assert isinstance(resp_all_films.body, list)
     assert len(resp_all_films.body) == 6
     assert resp_all_films.body == _MOVIES
-
-
-async def test_films_check_no_films(es_client, make_get_request):
-    await es_load(es_client, "movies", [])
-
-    response = await make_get_request(
-        "films/?sort=imdb_rating&page[size]=1000&page[number]=1",
-    )
-
-    assert response.status == HTTPStatus.OK
-    assert response.body == []

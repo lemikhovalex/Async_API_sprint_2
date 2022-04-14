@@ -1,8 +1,7 @@
 from http import HTTPStatus
 
 import pytest
-from test_data import genres, movies
-from utils import es_load, filter_int
+from utils import filter_int
 
 # All test coroutines will be treated as marked with this decorator.
 pytestmark = pytest.mark.asyncio
@@ -53,17 +52,13 @@ TEST_FILMS_BY_GENRES_PAGINATION_DATA = [
 ]
 
 
-async def test_genre_by_id_absent(es_client, make_get_request):
-    await es_load(es_client, "genres", genres.genres)
-
+async def test_genre_by_id_absent(make_get_request):
     response = await make_get_request("genres/1f64e918-0000-11ec-90b3-00155db24537")
 
     assert response.status == HTTPStatus.NOT_FOUND
 
 
-async def test_genre_by_id(es_client, make_get_request):
-    await es_load(es_client, "genres", genres.genres)
-
+async def test_genre_by_id(make_get_request):
     response = await make_get_request("genres/1f64e918-b298-11ec-90b3-00155db24537")
 
     assert response.status == HTTPStatus.OK
@@ -73,9 +68,7 @@ async def test_genre_by_id(es_client, make_get_request):
     }
 
 
-async def test_genres(es_client, make_get_request):
-    await es_load(es_client, "genres", genres.genres)
-
+async def test_genres(make_get_request):
     response = await make_get_request("genres")
 
     assert response.status == HTTPStatus.OK
@@ -83,18 +76,7 @@ async def test_genres(es_client, make_get_request):
     assert len(response.body) == 3
 
 
-async def test_genres_empty(es_client, make_get_request):
-
-    response = await make_get_request("genres")
-
-    assert response.status == HTTPStatus.OK
-    assert response.body == []
-
-
-async def test_genre_films(es_client, make_get_request):
-    await es_load(es_client, "genres", genres.genres)
-    await es_load(es_client, "movies", movies.movies)
-
+async def test_genre_films(make_get_request):
     response = await make_get_request(
         "genres/1f64e918-b298-11ec-90b3-00155db24537/films"
     )
@@ -124,11 +106,7 @@ async def test_genre_films(es_client, make_get_request):
     TEST_GENRES_PAGINATION_DATA,
     ids=filter_int,
 )
-async def test_genres_pagination(
-    page_num, page_size, expected_resp, es_client, make_get_request
-):
-    await es_load(es_client, "genres", genres.genres)
-
+async def test_genres_pagination(page_num, page_size, expected_resp, make_get_request):
     response = await make_get_request(
         "genres", {"page[size]": page_size, "page[number]": page_num}
     )
@@ -143,11 +121,8 @@ async def test_genres_pagination(
     ids=filter_int,
 )
 async def test_genre_films_pagination(
-    page_num, page_size, expected_resp, es_client, make_get_request
+    page_num, page_size, expected_resp, make_get_request
 ):
-    await es_load(es_client, "genres", genres.genres)
-    await es_load(es_client, "movies", movies.movies)
-
     response = await make_get_request(
         "genres/1f64e918-b298-11ec-90b3-00155db24537/films",
         {"page[size]": page_size, "page[number]": page_num},
