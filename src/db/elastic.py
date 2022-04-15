@@ -52,7 +52,7 @@ class ESStorage(BaseStorage):
         return await self.es.close()
 
 
-es: AsyncElasticsearch
+es: ESStorage
 
 
 async def get_elastic() -> ESStorage:
