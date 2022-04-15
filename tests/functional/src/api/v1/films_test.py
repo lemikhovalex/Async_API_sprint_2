@@ -5,8 +5,8 @@ from operator import attrgetter
 
 import pytest
 from pydantic import BaseModel
-from test_data.movies import movies
-from utils import filter_int
+from test_data import movies
+from utils import filter_int, filter_uuid
 
 
 class PartialFilm(BaseModel):
@@ -26,44 +26,20 @@ TEST_FILMS_PAGINATION_DATA = [
     (
         1,
         3,
-        [
-            {
-                "uuid": "1f650754-b298-11ec-90b3-00155db24537",
-                "title": "HP 1",
-                "imdb_rating": 10.0,
-            },
-            {
-                "uuid": "1f656672-b298-11ec-90b3-00155db24537",
-                "title": "SW 1",
-                "imdb_rating": 10.0,
-            },
-            {
-                "uuid": "1f651c76-b298-11ec-90b3-00155db24537",
-                "title": "HP 2",
-                "imdb_rating": 9.9,
-            },
-        ],
+        {
+            "1f650754-b298-11ec-90b3-00155db24537",
+            "1f656672-b298-11ec-90b3-00155db24537",
+            "1f651c76-b298-11ec-90b3-00155db24537",
+        },
     ),
     (
         2,
         3,
-        [
-            {
-                "uuid": "1f657e5a-b298-11ec-90b3-00155db24537",
-                "title": "SW 2",
-                "imdb_rating": 9.9,
-            },
-            {
-                "uuid": "1f652f72-b298-11ec-90b3-00155db24537",
-                "title": "HP 3",
-                "imdb_rating": 9.8,
-            },
-            {
-                "uuid": "1f6546ba-b298-11ec-90b3-00155db24537",
-                "title": "HP 4",
-                "imdb_rating": 9.7,
-            },
-        ],
+        {
+            "1f657e5a-b298-11ec-90b3-00155db24537",
+            "1f652f72-b298-11ec-90b3-00155db24537",
+            "1f6546ba-b298-11ec-90b3-00155db24537",
+        },
     ),
 ]
 
@@ -78,73 +54,7 @@ async def test_film_by_id(make_get_request):
     response = await make_get_request("films/1f6546ba-b298-11ec-90b3-00155db24537")
 
     assert response.status == HTTPStatus.OK
-    assert response.body == {
-        "uuid": "1f6546ba-b298-11ec-90b3-00155db24537",
-        "imdb_rating": 9.7,
-        "title": "HP 4",
-        "description": "description for HP",
-        "genres": [
-            {"uuid": "1f64e56c-b298-11ec-90b3-00155db24537", "name": "comedy"},
-            {"uuid": "1f64e81e-b298-11ec-90b3-00155db24537", "name": "drama"},
-        ],
-        "actors": [
-            {"uuid": "1f64f02a-b298-11ec-90b3-00155db24537", "full_name": "HP_actor_0"},
-            {"uuid": "1f64f138-b298-11ec-90b3-00155db24537", "full_name": "HP_actor_1"},
-            {"uuid": "1f64f228-b298-11ec-90b3-00155db24537", "full_name": "HP_actor_2"},
-            {
-                "uuid": "1f64ea08-b298-11ec-90b3-00155db24537",
-                "full_name": "Multitask person 0",
-            },
-            {
-                "uuid": "1f64ed64-b298-11ec-90b3-00155db24537",
-                "full_name": "Multitask person 1",
-            },
-        ],
-        "directors": [
-            {
-                "uuid": "1f64f674-b298-11ec-90b3-00155db24537",
-                "full_name": "HP_director_0",
-            },
-            {
-                "uuid": "1f64f746-b298-11ec-90b3-00155db24537",
-                "full_name": "HP_director_1",
-            },
-            {
-                "uuid": "1f64f822-b298-11ec-90b3-00155db24537",
-                "full_name": "HP_director_2",
-            },
-            {
-                "uuid": "1f64eecc-b298-11ec-90b3-00155db24537",
-                "full_name": "Multitask person 2",
-            },
-            {
-                "uuid": "1f64ea08-b298-11ec-90b3-00155db24537",
-                "full_name": "Multitask person 0",
-            },
-        ],
-        "writers": [
-            {
-                "uuid": "1f64f32c-b298-11ec-90b3-00155db24537",
-                "full_name": "HP_writer_0",
-            },
-            {
-                "uuid": "1f64f412-b298-11ec-90b3-00155db24537",
-                "full_name": "HP_writer_1",
-            },
-            {
-                "uuid": "1f64f520-b298-11ec-90b3-00155db24537",
-                "full_name": "HP_writer_2",
-            },
-            {
-                "uuid": "1f64ed64-b298-11ec-90b3-00155db24537",
-                "full_name": "Multitask person 1",
-            },
-            {
-                "uuid": "1f64eecc-b298-11ec-90b3-00155db24537",
-                "full_name": "Multitask person 2",
-            },
-        ],
-    }
+    assert response.body == movies.expected_film_by_id
 
 
 @pytest.mark.parametrize(
@@ -161,11 +71,11 @@ async def test_films_pagination(page_num, page_size, expected_resp, make_get_req
     )
 
     assert films_resp.status == HTTPStatus.OK
-    assert films_resp.body == expected_resp
+    assert filter_uuid(films_resp.body) == expected_resp
 
 
 async def test_films_check_all_films(make_get_request):
-    _MOVIES = copy.deepcopy(movies)
+    _MOVIES = copy.deepcopy(movies.movies)
     _MOVIES = [PartialFilm(**m) for m in _MOVIES]
     _MOVIES = sorted(_MOVIES, key=attrgetter("uuid"))
     _MOVIES = sorted(_MOVIES, key=attrgetter("imdb_rating"), reverse=True)
