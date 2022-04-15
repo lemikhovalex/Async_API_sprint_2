@@ -1,22 +1,8 @@
-import copy
-import json
 from http import HTTPStatus
-from operator import attrgetter
 
 import pytest
-from pydantic import BaseModel
 from test_data import movies
 from utils import filter_int, filter_uuid
-
-
-class PartialFilm(BaseModel):
-    imdb_rating: float
-    title: str
-    uuid: str
-
-    class Config:
-        fields = {"uuid": "id"}
-
 
 # All test coroutines will be treated as marked with this decorator.
 pytestmark = pytest.mark.asyncio
@@ -75,12 +61,6 @@ async def test_films_pagination(page_num, page_size, expected_resp, make_get_req
 
 
 async def test_films_check_all_films(make_get_request):
-    _MOVIES = copy.deepcopy(movies.movies)
-    _MOVIES = [PartialFilm(**m) for m in _MOVIES]
-    _MOVIES = sorted(_MOVIES, key=attrgetter("uuid"))
-    _MOVIES = sorted(_MOVIES, key=attrgetter("imdb_rating"), reverse=True)
-    _MOVIES = [json.loads(f.json()) for f in _MOVIES]
-
     resp_all_films = await make_get_request(
         "films", params={"sort": "imdb_rating", "page[size]": 1000, "page[number]": 1}
     )
@@ -88,4 +68,4 @@ async def test_films_check_all_films(make_get_request):
     assert resp_all_films.status == HTTPStatus.OK
     assert isinstance(resp_all_films.body, list)
     assert len(resp_all_films.body) == 6
-    assert resp_all_films.body == _MOVIES
+    assert resp_all_films.body == movies.expected_films_check_all

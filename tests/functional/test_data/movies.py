@@ -1,3 +1,19 @@
+import copy
+import json
+from operator import attrgetter
+
+from pydantic import BaseModel
+
+
+class PartialFilm(BaseModel):
+    imdb_rating: float
+    title: str
+    uuid: str
+
+    class Config:
+        fields = {"uuid": "id"}
+
+
 movies = [
     {
         "id": "1f650754-b298-11ec-90b3-00155db24537",
@@ -380,3 +396,15 @@ expected_film_by_id = {
         },
     ],
 }
+
+
+def _expected_films_check_all():
+    _MOVIES = copy.deepcopy(movies)
+    _MOVIES = [PartialFilm(**m) for m in _MOVIES]
+    _MOVIES = sorted(_MOVIES, key=attrgetter("uuid"))
+    _MOVIES = sorted(_MOVIES, key=attrgetter("imdb_rating"), reverse=True)
+    _MOVIES = [json.loads(f.json()) for f in _MOVIES]
+    return _MOVIES
+
+
+expected_films_check_all = _expected_films_check_all()
